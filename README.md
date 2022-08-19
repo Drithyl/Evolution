@@ -1,6 +1,8 @@
 # Evolution
 CS Final Project simulating the workings of evolution over multiple generations of creatures. Concept, terrain generation and custom terrain shader based on Sebastian Lague's excellent [ecosystem simulation](https://github.com/SebLague/Ecosystem-2/tree/master). Most of the borrowed code has been refactored or rebuilt from the grounds up.
 
+More details on the goals of the project can be found in my [midterm report](https://docs.google.com/document/d/1kLYXM7bCpaHHlvhtzHdlWk9fkTlYQ4Y3WisZ4CgeYk8/edit?usp=sharing).
+
 
 ## Current Progress
 
