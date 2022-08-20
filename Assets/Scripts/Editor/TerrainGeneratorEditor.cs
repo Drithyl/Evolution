@@ -15,7 +15,7 @@ namespace TerrainGeneration
 
             if (GUILayout.Button("Refresh"))
             {
-                terrainGenerator.Generate();
+                terrainGenerator.GenerateTerrain();
             }
         }
 

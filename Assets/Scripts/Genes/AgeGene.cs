@@ -23,6 +23,11 @@ public class AgeGene : Gene
 
 
     [SerializeField]
+    private int _maxOffspring = 0;
+    public int MaxOffspring { get { return _maxOffspring; } }
+
+
+    [SerializeField]
     private float _secondsToCompleteMating;
     public float SecondsToCompleteMating { get { return _secondsToCompleteMating; } }
 
@@ -61,8 +66,10 @@ public class AgeGene : Gene
 
     public override void Randomize()
     {
-        _maxAge = Random.Range(20, 30);
-        _secondsToCompleteMating = Random.Range(1, 3);
+        _maxAge = Random.Range(30, 40);
+        _maxOffspring = Random.Range(1, 4);
+        _maturityAge = Mathf.FloorToInt(_maxAge * Random.Range(0.2f, 0.4f));
+        _secondsToCompleteMating = GameManager.Instance.TimeBetweenTurns * Random.Range(0.75f, 1.25f);
     }
 
     public override void Inherit(Gene inheritedGene)
@@ -70,8 +77,21 @@ public class AgeGene : Gene
         AgeGene inheritedAgeGene = inheritedGene as AgeGene;
 
         _maxAge = inheritedAgeGene.MaxAge;
+        _maxOffspring = inheritedAgeGene.MaxOffspring;
         _maturityAge = inheritedAgeGene.MaturityAge;
         _secondsToCompleteMating = inheritedAgeGene.SecondsToCompleteMating;
+    }
+
+    public override void PointMutate()
+    {
+        int maxAgeMutatePercent = Mathf.FloorToInt(Mathf.Max(1, MaxAge * 0.1f));
+        int maturityAgeMutatePercent = Mathf.FloorToInt(Mathf.Max(1, MaturityAge * 0.1f));
+        float matingDurationMutatePercent = SecondsToCompleteMating * 0.1f;
+
+        _maxAge = Mathf.Max(5, MaxAge + Random.Range(-maxAgeMutatePercent, maxAgeMutatePercent));
+        _maxOffspring = Mathf.Max(1, MaxOffspring + Random.Range(-1, 2));
+        _maturityAge = Mathf.Max(1, MaxAge + Random.Range(-maturityAgeMutatePercent, maturityAgeMutatePercent));
+        _secondsToCompleteMating = Mathf.Max(1, SecondsToCompleteMating + Random.Range(-matingDurationMutatePercent, matingDurationMutatePercent));
     }
 
     public void GrowOld()
@@ -146,7 +166,10 @@ public class AgeGene : Gene
         _isMating = false;
         _alreadyMated = true;
 
-        SpawnOffspring();
+        int numberOfChildren = Random.Range(1, MaxOffspring + 1);
+
+        for (int i = 0; i < numberOfChildren; i++)
+            SpawnOffspring();
     }
 
     private void SpawnOffspring()
@@ -165,6 +188,7 @@ public class AgeGene : Gene
         Creature offspring = CreatureSpawner.Instance.Spawn(Species.Animal, parent.Position);
         Statistics offspringStatistics = offspring.GetComponent<Statistics>();
         offspring.InheritGenome(inheritedGenome);
+        offspring.Mutate(0.2f);
 
         statistics.OffspringCreated++;
 

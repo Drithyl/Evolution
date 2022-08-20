@@ -91,6 +91,13 @@ public class TerrainMesh
         UpdateColours(meshRenderer.sharedMaterial);
     }
 
+    public void UpdateShader()
+    {
+        mesh.SetUVs(0, uvs);
+        mesh.SetNormals(normals);
+        UpdateColours(meshRenderer.sharedMaterial);
+    }
+
     private void CreateMeshComponents()
     {
         if (meshFilter == null)

@@ -5,9 +5,9 @@ using System;
 
 public class WorldPositions
 {
-    static private Vector3[,] tileCentres = new Vector3[WorldTerrain.Width, WorldTerrain.Height];
-    static private Dictionary<Creature, GridCoord> creaturePositions = new Dictionary<Creature, GridCoord>();
-    static private Dictionary<Food, GridCoord> foodPositions = new Dictionary<Food, GridCoord>();
+    static private Vector3[,] tileCentres;
+    static private Dictionary<Creature, GridCoord> creaturePositions;
+    static private Dictionary<Food, GridCoord> foodPositions;
 
     static public void Initialize()
     {

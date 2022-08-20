@@ -6,6 +6,40 @@ public class GameManager : MonoBehaviour
 {
     static public GameManager Instance { get; private set; }
 
+    public bool headlessMode = false;
+
+    [Tooltip("Real-time seconds in-between game turns. Lower value, faster simulation.")]
+    [Range(0.1f, 5)]
+    [SerializeField]
+    private float _timeBetweenTurns = 1;
+
+    public float TimeBetweenTurns { get { return _timeBetweenTurns; } }
+
+    [Tooltip("Number of game turns for a month to pass. Month passing affects age and food growth.")]
+    [Range(1, 50)]
+    [SerializeField]
+    private int turnsBetweenMonths = 10;
+
+    [Tooltip("The percentage chance for new food to appear in a tile each month.")]
+    [Range(0.001f, 100)]
+    [SerializeField]
+    private float chanceOfFoodToSpawn = 0.01f;
+
+    [Tooltip("The amount that newly grown food starts with.")]
+    [Range(1, 10)]
+    [SerializeField]
+    private int startFoodOnNewGrowth = 2;
+
+    [Tooltip("Existing food growth per month.")]
+    [Range(-10, 10)]
+    [SerializeField]
+    private int foodGrowthPerMonth = 1;
+
+    [Tooltip("Fully grown food decay per month.")]
+    [Range(-10, 10)]
+    [SerializeField]
+    private int foodDecayPerMonth = -1;
+
     [ReadOnly]
     [SerializeField]
     private float _time;
@@ -17,14 +51,6 @@ public class GameManager : MonoBehaviour
     [ReadOnly]
     [SerializeField]
     private int _nextMonthCounter;
-
-    [SerializeField]
-    private float _timeBetweenTurns = 1;
-
-    public float TimeBetweenTurns { get { return _timeBetweenTurns; } }
-
-    [SerializeField]
-    private float _turnsBetweenMonths = 10;
 
     private List<Creature> creatures = new List<Creature>();
     private List<Creature> creaturesAddQueue = new List<Creature>();
@@ -49,13 +75,15 @@ public class GameManager : MonoBehaviour
         bool isNewMonth = CheckIfNewMonth();
 
         if (isNewMonth == true)
+        {
             GrowFood();
+            SpreadFood(chanceOfFoodToSpawn);
+        }
 
         foreach (Creature creature in creatures)
         {
             AgeGene ageGene = creature.GetComponent<AgeGene>();
             MovementGene movementGene = creature.GetComponent<MovementGene>();
-            GeneManager geneManager = creature.GetComponent<GeneManager>();
 
             if (isNewMonth == true && ageGene != null)
                 ageGene.GrowOld();
@@ -63,8 +91,8 @@ public class GameManager : MonoBehaviour
             if (movementGene != null && movementGene.IsMoving == true)
                 movementGene.AnimateMove();
 
-            if (isNewTurn == true && geneManager != null)
-                geneManager.UpdateBehaviour(creature);
+            if (isNewTurn == true)
+                GeneManager.Instance.UpdateBehaviour(creature);
         }
 
         UpdateCreatureList();
@@ -79,7 +107,7 @@ public class GameManager : MonoBehaviour
 
     private bool CheckIfNewTurn()
     {
-        bool isNewTurn = _time > _timeBetweenTurns;
+        bool isNewTurn = _time > _timeBetweenTurns || headlessMode == true;
 
         if (isNewTurn == true)
         {
@@ -92,12 +120,28 @@ public class GameManager : MonoBehaviour
 
     private bool CheckIfNewMonth()
     {
-        bool isNewMonth = _nextMonthCounter >= _turnsBetweenMonths == true;
+        bool isNewMonth = _nextMonthCounter >= turnsBetweenMonths == true;
 
         if (isNewMonth == true)
             _nextMonthCounter = 0;
 
         return isNewMonth;
+    }
+
+    private void GrowFood()
+    {
+        foreach (Food food in foodSupply)
+        {
+            if (food.ReachedFullGrowth == true)
+                food.Add(foodDecayPerMonth);
+
+            else food.Add(foodGrowthPerMonth);
+        }
+    }
+
+    private void SpreadFood(float chance)
+    {
+        FoodSpawner.Instance.SpawnFood(chance, startFoodOnNewGrowth);
     }
 
     private void UpdateCreatureList()
@@ -130,21 +174,13 @@ public class GameManager : MonoBehaviour
         WorldPositions.RemoveCreaturePosition(creature);
     }
 
-    public void AddFood(Food food)
+    public void AddFoodToSupply(Food food)
     {
         foodSupply.Add(food);
         WorldPositions.SetFoodPosition(food, food.Position);
     }
 
-    public void GrowFood()
-    {
-        foreach (Food food in foodSupply)
-            food.Grow();
-
-        FoodSpawner.Instance.SpawnFood(0.001f);
-    }
-
-    public void RemoveFood(Food food)
+    public void RemoveFoodFromSupply(Food food)
     {
         foodSupply.Remove(food);
         WorldPositions.RemoveFoodPosition(food);

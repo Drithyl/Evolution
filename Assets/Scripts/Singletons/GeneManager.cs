@@ -4,6 +4,18 @@ using UnityEngine;
 
 public class GeneManager : MonoBehaviour
 {
+    static public GeneManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        EnsureSingleton();
+    }
+
+    private void OnValidate()
+    {
+        EnsureSingleton();
+    }
+
     public void UpdateBehaviour(Creature creature)
     {
         ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
@@ -71,5 +83,15 @@ public class GeneManager : MonoBehaviour
             else if (perceptionGene != null)
                 movementGene.Explore(perceptionGene);
         }
+    }
+
+    private void EnsureSingleton()
+    {
+        // If an instance of this class exists but it's not me,
+        // destroy myself to ensure only one instance exists (Singleton)
+        if (Instance != null && Instance != this)
+            Destroy(this);
+
+        else Instance = this;
     }
 }

@@ -35,7 +35,7 @@ public class FoodSpawner : MonoBehaviour
 
         // Delete existing food
         foreach (Transform child in existingFood)
-            if (child != transform)
+            if (child != transform && child != null && child.gameObject != null)
                 DestroyImmediate(child.gameObject);
     }
 
@@ -57,6 +57,28 @@ public class FoodSpawner : MonoBehaviour
                 GameObject food = Instantiate(foodPrefab, transform);
                 Food foodScript = food.GetComponent<Food>();
                 foodScript.Initialize(new GridCoord(x, y));
+            }
+        }
+    }
+
+    public void SpawnFood(float foodChancePerTile, int startingAmount)
+    {
+        for (int x = 0; x < WorldTerrain.Width; x++)
+        {
+            for (int y = 0; y < WorldTerrain.Height; y++)
+            {
+                if (WorldTerrain.IsLand(x, y) == false)
+                    continue;
+
+                if (WorldPositions.HasFoodAt(x, y) == true)
+                    continue;
+
+                if (Random.value > foodChancePerTile)
+                    continue;
+
+                GameObject food = Instantiate(foodPrefab, transform);
+                Food foodScript = food.GetComponent<Food>();
+                foodScript.Initialize(new GridCoord(x, y), startingAmount);
             }
         }
     }

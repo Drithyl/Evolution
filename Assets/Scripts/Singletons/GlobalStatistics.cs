@@ -7,6 +7,8 @@ public class GlobalStatistics : MonoBehaviour
 {
     static public GlobalStatistics Instance { get; private set; }
 
+    private List<Statistics> creatureStatistics = new List<Statistics>();
+
 
     [ReadOnly]
     [SerializeField]
@@ -80,11 +82,21 @@ public class GlobalStatistics : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
-    private int _mostOffspringCreated;
-    public int MostOffspringCreated
+    private int _mostOffspringCreatedAtOnce;
+    public int MostOffspringCreatedAtOnce
     {
-        get { return _mostOffspringCreated; }
-        set { _mostOffspringCreated = Mathf.Max(MostOffspringCreated, value); }
+        get { return _mostOffspringCreatedAtOnce; }
+        set { _mostOffspringCreatedAtOnce = Mathf.Max(MostOffspringCreatedAtOnce, value); }
+    }
+
+
+    [ReadOnly]
+    [SerializeField]
+    private int _totalChildren;
+    public int TotalChildren
+    {
+        get { return _totalChildren; }
+        set { _totalChildren = value; }
     }
 
 
@@ -108,9 +120,10 @@ public class GlobalStatistics : MonoBehaviour
         EnsureSingleton();
     }
 
-    public void AddCauseOfDeath(CauseOfDeath causeOfDeath)
+    public void RecordCreatureStatistics(Statistics statistics)
     {
-        causeOfDeathCounters[(int)causeOfDeath]++;
+        creatureStatistics.Add(statistics);
+        causeOfDeathCounters[(int)statistics.DeathCausedBy]++;
         UpdateMostCommonCauseOfDeath();
     }
 

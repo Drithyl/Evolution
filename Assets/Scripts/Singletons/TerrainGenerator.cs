@@ -24,29 +24,14 @@ public class TerrainGenerator : MonoBehaviour
     [Range(5, 100)]
     public float scale = 10;
 
-    [Tooltip("Percentage change for food to spawn on land tile")]
+    [Tooltip("Percentage chance for starting food to spawn on land tile")]
     [Range(0, 1)]
-    public float foodDistribution = 0;
+    public float foodDistribution = 0.15f;
 
     public bool autoUpdate = true;
 
     public Material material;
     private TerrainMesh mesh;
-
-    public GameObject foodPrefab;
-
-    private GameObject foodContainer;
-
-    private int nextStepThreshold = 1;
-
-    [SerializeField]
-    private float stepSpeed = 0.25f;
-
-    [SerializeField]
-    private float currentTime = 0;
-
-    [SerializeField]
-    private bool gradualMeshGeneration = false;
 
     [SerializeField]
     private bool debugVertices = false;
@@ -56,30 +41,37 @@ public class TerrainGenerator : MonoBehaviour
 
     private bool needsUpdate;
 
-    void Update()
+    static public TerrainGenerator Instance { get; private set; }
+
+
+    private void Awake()
+    {
+        EnsureSingleton();
+    }
+
+    private void Start()
     {
         if (needsUpdate == true && autoUpdate == true)
         {
             needsUpdate = false;
-            Generate();
-        }
-
-        else if (!Application.isPlaying)
-        {
-            mesh.UpdateMesh();
+            GenerateTerrain();
+            FoodSpawner.Instance.ClearFood();
+            FoodSpawner.Instance.SpawnFood(foodDistribution);
         }
     }
 
     void OnValidate()
     {
         needsUpdate = true;
+        EnsureSingleton();
+
+        /*if (!Application.isPlaying)
+            mesh.UpdateShader();*/
     }
 
-    public void Generate()
+    public void GenerateTerrain()
     {
         float startTime = Time.realtimeSinceStartup;
-
-        FoodSpawner.Instance.ClearFood();
 
         Debug.Log("Generating height map...");
         //HeightMap map = DiamondSquare.Generate(size, minCornerValue, maxCornerValue, roughness);
@@ -94,9 +86,6 @@ public class TerrainGenerator : MonoBehaviour
         mesh = new TerrainMesh("TerrainMesh");
         mesh.SetMeshMaterial(material);
 
-        if (gradualMeshGeneration == true)
-            return;
-
         mesh.GenerateMesh();
 
         Debug.Log("World Land/Water Distribution: " + WorldTerrain.LandTilesNbr + "/" + WorldTerrain.WaterTilesNbr + " (" + WorldTerrain.LandTilePct + "% Land)");
@@ -104,30 +93,15 @@ public class TerrainGenerator : MonoBehaviour
 
         if (debugVertices == true)
             mesh.DebugMeshVertices();
-
-
-        FoodSpawner.Instance.SpawnFood(foodDistribution);
     }
 
-
-    private void FixedUpdate()
+    private void EnsureSingleton()
     {
-        if (gradualMeshGeneration == false)
-            return;
+        // If an instance of this class exists but it's not me,
+        // destroy myself to ensure only one instance exists (Singleton)
+        if (Instance != null && Instance != this)
+            Destroy(this);
 
-        if (mesh.IsMeshComplete == true)
-            return;
-
-
-        if (currentTime >= nextStepThreshold)
-        {
-            currentTime = 0;
-            mesh.GenerateNextStep();
-
-            if (mesh.IsMeshComplete == true && debugVertices == true)
-                mesh.DebugMeshVertices();
-        }
-
-        else currentTime += stepSpeed;
+        else Instance = this;
     }
 }

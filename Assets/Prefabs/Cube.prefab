@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 4238137894254285132}
   - component: {fileID: -6824755135150892927}
   - component: {fileID: 8360193851118204375}
-  - component: {fileID: -3493639821393507744}
   - component: {fileID: -371922515176959452}
   - component: {fileID: 2455918836292775391}
   - component: {fileID: -1489980883524175487}
@@ -122,27 +121,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   isFemale: 0
-  tilesTraveled: 0
-  landTilesSeen: 0
-  waterTilesSeen: 0
-  foodConsumed: 0
-  waterDrunk: 0
-  monthsLived: 0
-  offspringCreated: 0
-  causeOfDeath: 0
+  _generation: 0
+  _tilesTraveled: 0
+  _landTilesSeen: 0
+  _waterTilesSeen: 0
+  _foodConsumed: 0
+  _waterDrunk: 0
+  _monthsLived: 0
+  _offspringCreated: 0
+  _deathCausedBy: 0
   descendants: []
---- !u!114 &-3493639821393507744
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1974381062715291377}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62fb2b6476eafe347bcc2663dc89d260, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &-371922515176959452
 MonoBehaviour:
   m_ObjectHideFlags: 0

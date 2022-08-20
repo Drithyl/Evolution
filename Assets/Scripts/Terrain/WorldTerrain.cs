@@ -38,6 +38,11 @@ abstract public class WorldTerrain
         landTiles = new List<GridCoord>();
         waterTiles = new List<GridCoord>();
 
+        shoreTilesNbr = 0;
+        inlandTilesNbr = 0;
+        landTilesNbr = 0;
+        waterTilesNbr = 0;
+
         WorldPositions.Initialize();
 
         for (int x = 0; x < Width; x++)

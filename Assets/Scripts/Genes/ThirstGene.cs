@@ -18,8 +18,8 @@ class ThirstGene : Gene
 
 
     [SerializeField]
-    private int _mouthfulNutrition;
-    public int MouthfulNutrition { get { return _mouthfulNutrition; } }
+    private float _mouthfulNutrition;
+    public float MouthfulNutrition { get { return _mouthfulNutrition; } }
 
 
     [SerializeField]
@@ -61,7 +61,7 @@ class ThirstGene : Gene
 
     public override void Randomize()
     {
-        _maxThirst = Random.Range(8, 13);
+        _maxThirst = Random.Range(15, 30);
         _mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxThirst * 0.3f), Mathf.FloorToInt(_maxThirst * 0.5f));
     }
 
@@ -73,9 +73,21 @@ class ThirstGene : Gene
         _mouthfulNutrition = inheritedThirstGene.MouthfulNutrition;
     }
 
+    public override void PointMutate()
+    {
+        int maxThirstMutatePercent = Mathf.FloorToInt(Mathf.Max(1, MaxThirst * 0.1f));
+        float mouthfulNutritionMutatePercent = MouthfulNutrition * 0.1f;
+
+        Debug.Log("Mutating max thirst by range: " + maxThirstMutatePercent);
+        Debug.Log("Mutating drinking mouthful by range: " + mouthfulNutritionMutatePercent);
+
+        _maxThirst = Mathf.Max(5, MaxThirst + Random.Range(-maxThirstMutatePercent, maxThirstMutatePercent));
+        _mouthfulNutrition = Mathf.Max(1, MouthfulNutrition + Random.Range(-mouthfulNutritionMutatePercent, mouthfulNutritionMutatePercent));
+    }
+
     public void Drink()
     {
-        int waterDrunk = Mathf.Min(MaxThirst - CurrentThirst, MouthfulNutrition);
+        int waterDrunk = Mathf.Min(MaxThirst - CurrentThirst, Mathf.FloorToInt(MouthfulNutrition));
 
         _currentThirst += waterDrunk;
         statistics.WaterDrunk += waterDrunk;

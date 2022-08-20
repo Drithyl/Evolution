@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Statistics))]
-[RequireComponent(typeof(GeneManager))]
 public class Creature : MonoBehaviour
 {
     public Material femaleMaterial;
@@ -57,9 +56,9 @@ public class Creature : MonoBehaviour
         GameManager.Instance.RemoveCreature(this);
     }
 
-    public void Initialize(GridCoord pos)
+    public void Initialize(GridCoord position)
     {
-        _position = pos;
+        _position = position;
         transform.position = WorldPositions.GetTileCentre(Position);
 
         _isFemale = Random.value < 0.5f;
@@ -73,12 +72,19 @@ public class Creature : MonoBehaviour
         //Debug.Log("Creature created at " + position.ToString());
     }
 
+    public void Mutate(float chanceOfGeneMutation)
+    {
+        foreach (Gene gene in genome)
+            if (Random.value <= chanceOfGeneMutation)
+                gene.PointMutate();
+    }
+
     public void Die(CauseOfDeath causeOfDeath)
     {
         _isDying = true;
         Destroy(gameObject);
         statistics.DeathCausedBy = causeOfDeath;
-
+        GlobalStatistics.Instance.RecordCreatureStatistics(statistics);
         Debug.Log("Died of: " + causeOfDeath.ToString());
     }
 

@@ -110,7 +110,8 @@ public class Statistics : MonoBehaviour
         set
         {
             _offspringCreated = value;
-            GlobalStatistics.Instance.MostOffspringCreated = value;
+            GlobalStatistics.Instance.TotalChildren++;
+            GlobalStatistics.Instance.MostOffspringCreatedAtOnce = value;
         }
     }
 
@@ -119,11 +120,7 @@ public class Statistics : MonoBehaviour
     public CauseOfDeath DeathCausedBy
     {
         get { return _deathCausedBy; }
-        set
-        {
-            _deathCausedBy = value;
-            GlobalStatistics.Instance.AddCauseOfDeath(value);
-        }
+        set { _deathCausedBy = value; }
     }
 
     [ReadOnly]

@@ -7,9 +7,9 @@ public class PerceptionGene : Gene
     private Statistics statistics;
 
     [SerializeField]
-    private int _distance;
+    private float _distance;
 
-    public int Distance { get { return _distance; } }
+    public float Distance { get { return _distance; } }
 
 
     private PerceptionField _perception;
@@ -26,7 +26,7 @@ public class PerceptionGene : Gene
 
     public override void Randomize()
     {
-        _distance = Random.Range(3, 6);
+        _distance = Random.Range(4f, 7f);
     }
 
     public override void Inherit(Gene inheritedGene)
@@ -36,9 +36,18 @@ public class PerceptionGene : Gene
         _distance = inheritedPerceptionGene.Distance;
     }
 
+    public override void PointMutate()
+    {
+        float perceptionMutatePercent = Distance * 0.1f;
+
+        Debug.Log("Mutating perception distance by range: " + perceptionMutatePercent);
+
+        _distance = Mathf.Max(1, Distance + Random.Range(-perceptionMutatePercent, perceptionMutatePercent));
+    }
+
     public void UpdatePerception()
     {
         Creature parent = GetComponent<Creature>();
-        _perception = new PerceptionField(parent.Position, Distance);
+        _perception = new PerceptionField(parent.Position, Mathf.FloorToInt(Distance));
     }
 }

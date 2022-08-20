@@ -48,8 +48,10 @@ public class MovementGene : Gene
 
     public override void Randomize()
     {
-        //_speed = Random.Range(0.75f, 1.25f);
-        _secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
+        //_secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
+        float percentOfGlobalTime = GameManager.Instance.TimeBetweenTurns * 0.15f;
+
+        _secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns + Random.Range(-percentOfGlobalTime, percentOfGlobalTime);
     }
 
     public override void Inherit(Gene inheritedGene)
@@ -57,6 +59,15 @@ public class MovementGene : Gene
         MovementGene inheritedMovementGene = inheritedGene as MovementGene;
 
         _secondsToCompleteMove = inheritedMovementGene.SecondsToCompleteMove;
+    }
+
+    public override void PointMutate()
+    {
+        float movementDurationMutatePercent = SecondsToCompleteMove * 0.1f;
+
+        Debug.Log("Mutating movement duration by range: " + movementDurationMutatePercent);
+
+        _secondsToCompleteMove = Mathf.Max(1, SecondsToCompleteMove + Random.Range(-movementDurationMutatePercent, movementDurationMutatePercent));
     }
 
     public void SetMovePath(List<GridCoord> path)
@@ -73,7 +84,7 @@ public class MovementGene : Gene
     {
         GridCoord randomTile = perceptionGene.Perception.RandomEmptyLandTile;
         _moveQueue = AStar.GetShortestPath(parent.Position, randomTile);
-        Debug.Log("Exploring towards tile " + randomTile.ToString());
+        //Debug.Log("Exploring towards tile " + randomTile.ToString());
 
         if (_moveQueue == null)
             Debug.Log("Invalid path received");
@@ -116,7 +127,7 @@ public class MovementGene : Gene
     {
         // Make sure move speed is always same as our turn time to keep it all visually synchronized
         // Higher speeds here wouldn't make creatures move faster in game terms, only visually so
-        _secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
+        //_secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
 
         // For Lerping explanation, see answer marked as solution:
         // https://gamedev.stackexchange.com/questions/149103/why-use-time-deltatime-in-lerping-functions
