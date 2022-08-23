@@ -16,6 +16,90 @@ public class GeneManager : MonoBehaviour
         EnsureSingleton();
     }
 
+    public void UpdateImpulse(Creature creature)
+    {
+        ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
+        HungerGene hungerGene = creature.GetComponent<HungerGene>();
+        AgeGene ageGene = creature.GetComponent<AgeGene>();
+        PerceptionGene perceptionGene = creature.GetComponent<PerceptionGene>();
+        MovementGene movementGene = creature.GetComponent<MovementGene>();
+
+        Gene mostUrgentImpulse;
+        creature.ClearStatusText();
+
+
+        // TOO BUSY TO ACT
+        if (creature.IsDying == true)
+            return;
+
+        if (movementGene != null && movementGene.IsMoving == true)
+            return;
+
+
+        // ONGOING ACTIONS THAT MAY CONTINUE
+        if (ageGene != null && ageGene.IsMating == true)
+        {
+            ageGene.Mate();
+            return;
+        }
+
+        if (thirstGene != null && thirstGene.IsSeekingWater == true && WorldTerrain.IsTileShore(creature.Position) == true)
+        {
+            thirstGene.Drink();
+            return;
+        }
+
+        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position) == true)
+        {
+            hungerGene.Eat();
+            return;
+        }
+
+        // UPDATE VIEW OF THE WORLD
+        if (perceptionGene != null)
+            perceptionGene.UpdatePerception();
+
+
+        // NEW ACTIONS
+        mostUrgentImpulse = GetMostUrgentImpulse(creature);
+        Debug.Log("Most urgent impulse: " + mostUrgentImpulse.ToString() + " at " + mostUrgentImpulse.UrgeLevel);
+
+        if (mostUrgentImpulse == ageGene)
+        {
+            if (ageGene.CanStartMating() == true)
+            {
+                ageGene.StartMating();
+                return;
+            }
+
+            else if (perceptionGene != null)
+                ageGene.SeekMate(perceptionGene);
+        }
+
+        else if (mostUrgentImpulse == hungerGene && perceptionGene != null)
+        {
+            if (perceptionGene.Perception.IsFoodInSight == true)
+                hungerGene.SeekFood(perceptionGene);
+        }
+
+        else if (mostUrgentImpulse == thirstGene && perceptionGene != null)
+        {
+            if (perceptionGene.Perception.IsShoreTileInSight == true)
+                thirstGene.SeekWater(perceptionGene);
+        }
+
+
+        // MOVEMENT FOLLOW-UP
+        if (movementGene != null)
+        {
+            if (movementGene.HasMoveQueued == true)
+                movementGene.StartMove();
+
+            else if (perceptionGene != null)
+                movementGene.Explore(perceptionGene);
+        }
+    }
+
     public void UpdateBehaviour(Creature creature)
     {
         ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
@@ -24,6 +108,7 @@ public class GeneManager : MonoBehaviour
         PerceptionGene perceptionGene = creature.GetComponent<PerceptionGene>();
         MovementGene movementGene = creature.GetComponent<MovementGene>();
 
+        creature.ClearStatusText();
 
         if (creature.IsDying == true)
             return;
@@ -83,6 +168,17 @@ public class GeneManager : MonoBehaviour
             else if (perceptionGene != null)
                 movementGene.Explore(perceptionGene);
         }
+    }
+
+    private Gene GetMostUrgentImpulse(Creature creature)
+    {
+        Gene mostUrgentImpulse = creature.Genome[0];
+
+        foreach (Gene gene in creature.Genome)
+            if (gene.UrgeLevel > mostUrgentImpulse.UrgeLevel)
+                mostUrgentImpulse = gene;
+
+        return mostUrgentImpulse;
     }
 
     private void EnsureSingleton()

@@ -31,6 +31,7 @@ public class MovementGene : Gene
     public bool HasMoveQueued { get { return _moveQueue != null && _moveQueue.Count > 0; } }
 
 
+    public override float UrgeLevel => 0;
     override public string Name { get { return "Movement"; } }
 
 
@@ -84,6 +85,8 @@ public class MovementGene : Gene
     {
         GridCoord randomTile = perceptionGene.Perception.RandomEmptyLandTile;
         _moveQueue = AStar.GetShortestPath(parent.Position, randomTile);
+
+        parent.SetStatusText("Exploring to " + randomTile.ToString());
         //Debug.Log("Exploring towards tile " + randomTile.ToString());
 
         if (_moveQueue == null)
@@ -99,12 +102,12 @@ public class MovementGene : Gene
         {
             if (MoveQueue.Count == 1)
             {
-                Debug.Log("Last tile queued is blocked; stopping here");
+                //Debug.Log("Last tile queued is blocked; stopping here");
                 _moveQueue.Clear();
                 return;
             }
 
-            Debug.Log("Next tile queued is blocked; Rerouting");
+            //Debug.Log("Next tile queued is blocked; Rerouting");
             _moveQueue.Clear();
 
             //_moveQueue = AStar.GetShortestPath(parent.Position, MoveQueue[MoveQueue.Count - 1]);
@@ -145,7 +148,7 @@ public class MovementGene : Gene
 
     private void FinishMove()
     {
-        Debug.Log("Finished moving");
+        //Debug.Log("Finished moving");
         _isMoving = false;
         moveProgress = 0;
         statistics.TilesTraveled++;

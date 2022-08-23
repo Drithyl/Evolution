@@ -5,28 +5,37 @@ using System;
 
 public class BiomeManager : MonoBehaviour
 {
+    static public BiomeManager Instance { get; private set; }
+
     public Biome water;
     public Biome sand;
     public Biome grass;
 
-    static private List<Biome> biomes;
+    private List<Biome> biomes;
 
-    private void OnValidate()
+    private void Awake()
     {
+        EnsureSingleton();
         biomes = new() { water, sand, grass };
     }
 
-    static public bool IsLand(float height)
+    private void OnValidate()
+    {
+        EnsureSingleton();
+        biomes = new() { water, sand, grass };
+    }
+
+    public bool IsLand(float height)
     {
         return height >= biomes[0].end;
     }
 
-    static public bool IsWater(float height)
+    public bool IsWater(float height)
     {
         return height >= biomes[0].start && height < biomes[0].end;
     }
 
-    static public int GetBiomeIndexAtHeight(float height)
+    public int GetBiomeIndexAtHeight(float height)
     {
         for (int i = 0; i < biomes.Count; i++)
         {
@@ -39,7 +48,7 @@ public class BiomeManager : MonoBehaviour
         throw new Exception("No biome exists at height " + height);
     }
 
-    static public float GetBiomeMappedHeight(float height)
+    public float GetBiomeMappedHeight(float height)
     {
         for (int i = 0; i < biomes.Count; i++)
         {
@@ -52,14 +61,14 @@ public class BiomeManager : MonoBehaviour
         throw new Exception("No biome exists at height " + height);
     }
 
-    static public float GetBiomeMappedHeight(float height, int biomeIndex)
+    public float GetBiomeMappedHeight(float height, int biomeIndex)
     {
         Biome biome = biomes[biomeIndex];
         float scaledHeight = Mathf.InverseLerp(biome.start, biome.end, height);
         return scaledHeight;
     }
 
-    static public Color GetBiomeColour(float height)
+    public Color GetBiomeColour(float height)
     {
         for (int i = 0; i < biomes.Count; i++)
         {
@@ -73,7 +82,7 @@ public class BiomeManager : MonoBehaviour
         return new Color();
     }
 
-    static public Color[] GetStartColours()
+    public Color[] GetStartColours()
     {
         Color[] startColours = new Color[biomes.Count];
 
@@ -85,7 +94,7 @@ public class BiomeManager : MonoBehaviour
         return startColours;
     }
 
-    static public Color[] GetEndColours()
+    public Color[] GetEndColours()
     {
         Color[] endColours = new Color[biomes.Count];
 
@@ -95,5 +104,15 @@ public class BiomeManager : MonoBehaviour
         }
 
         return endColours;
+    }
+
+    private void EnsureSingleton()
+    {
+        // If an instance of this class exists but it's not me,
+        // destroy myself to ensure only one instance exists (Singleton)
+        if (Instance != null && Instance != this)
+            Destroy(this);
+
+        else Instance = this;
     }
 }

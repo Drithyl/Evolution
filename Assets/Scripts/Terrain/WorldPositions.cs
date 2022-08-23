@@ -123,19 +123,15 @@ public class WorldPositions
     static public List<TileVertices> GetAdjacentVertices(GridCoord baseCoord, GridCoord neighbourCoord)
     {
         if (neighbourCoord.IsNorthFrom(baseCoord) == true)
-            //return new List<TileVertices>() { TileVertices.NE, TileVertices.NW };
             return new List<TileVertices>() { TileVertices.NW, TileVertices.NE };
 
         if (neighbourCoord.IsSouthFrom(baseCoord) == true)
-            //return new List<TileVertices>() { TileVertices.SW, TileVertices.SE };
             return new List<TileVertices>() { TileVertices.SE, TileVertices.SW };
 
         if (neighbourCoord.IsWestFrom(baseCoord) == true)
-            //return new List<TileVertices>() { TileVertices.NW, TileVertices.SW };
             return new List<TileVertices>() { TileVertices.SW, TileVertices.NW };
 
         if (neighbourCoord.IsEastFrom(baseCoord) == true)
-            //return new List<TileVertices>() { TileVertices.SE, TileVertices.NE };
             return new List<TileVertices>() { TileVertices.NE, TileVertices.SE };
 
         throw new Exception("No adjacent vertices exist");
@@ -208,30 +204,23 @@ public class WorldPositions
         return heightInWorld;
     }
 
-
-    static public GridCoord GetNorthNeighbour(GridCoord coord)
-    {
-        return new GridCoord(coord.X, coord.Y + 1);
-    }
-
-    static public GridCoord GetSouthNeighbour(GridCoord coord)
-    {
-        return new GridCoord(coord.X, coord.Y - 1);
-    }
-
-    static public GridCoord GetWestNeighbour(GridCoord coord)
-    {
-        return new GridCoord(coord.X - 1, coord.Y);
-    }
-
-    static public GridCoord GetEastNeighbour(GridCoord coord)
-    {
-        return new GridCoord(coord.X + 1, coord.Y);
-    }
-
     static public List<GridCoord> GetLandNeighbours(GridCoord coord)
     {
         GridCoord[] neighbours = coord.GetNeighbours();
+        List<GridCoord> landNeighbours = new List<GridCoord>();
+
+        foreach (GridCoord neighbour in neighbours)
+        {
+            if (WorldTerrain.IsOutOfBounds(neighbour) == false && WorldTerrain.IsLand(neighbour) == true)
+                landNeighbours.Add(neighbour);
+        }
+
+        return landNeighbours;
+    }
+
+    static public List<GridCoord> GetOrthogonalLandNeighbours(GridCoord coord)
+    {
+        GridCoord[] neighbours = coord.GetOrthogonalNeighbours();
         List<GridCoord> landNeighbours = new List<GridCoord>();
 
         foreach (GridCoord neighbour in neighbours)
@@ -257,6 +246,20 @@ public class WorldPositions
         return walkableNeighbours;
     }
 
+    static public List<GridCoord> GetOrthogonalNeighbours(GridCoord coord)
+    {
+        GridCoord[] neighbours = coord.GetOrthogonalNeighbours();
+        List<GridCoord> walkableNeighbours = new List<GridCoord>();
+
+        foreach (GridCoord neighbour in neighbours)
+        {
+            if (WorldTerrain.IsOutOfBounds(neighbour) == false && WorldTerrain.IsLand(neighbour) == true && WorldTerrain.IsWalkable(neighbour) == true)
+                walkableNeighbours.Add(neighbour);
+        }
+
+        return walkableNeighbours;
+    }
+
     static public List<GridCoord> GetTilesWithinDistance(GridCoord coord, int radius, bool includeCentre = true)
     {
         List<GridCoord> tiles = new List<GridCoord>();
@@ -265,11 +268,13 @@ public class WorldPositions
         int endX = coord.X + radius;
         int endY = coord.Y + radius;
 
-        for (int x = startX; x < endX; x++)
+        // Optimization to use with GridSqrDistance(), which uses the squared distance
+        float distance = radius * radius;
+
+        for (int x = startX; x <= endX; x++)
         {
-            for (int y = startY; y < endY; y++)
+            for (int y = startY; y <= endY; y++)
             {
-                int dist = Mathf.Abs(coord.X - x) + Mathf.Abs(coord.Y - y);
                 GridCoord tile = new GridCoord(x, y);
 
                 if (WorldTerrain.IsOutOfBounds(tile) == true)
@@ -278,7 +283,35 @@ public class WorldPositions
                 if (tile == coord && includeCentre == false)
                     continue;
 
-                if (GridCoord.GridDistance(coord, tile) <= radius)
+                if (GridCoord.GridSqrDistance(coord, tile) <= distance)
+                    tiles.Add(tile);
+            }
+        }
+
+        return tiles;
+    }
+
+    static public List<GridCoord> GetTilesWithinManhattanDistance(GridCoord coord, int radius, bool includeCentre = true)
+    {
+        List<GridCoord> tiles = new List<GridCoord>();
+        int startX = coord.X - radius;
+        int startY = coord.Y - radius;
+        int endX = coord.X + radius;
+        int endY = coord.Y + radius;
+
+        for (int x = startX; x <= endX; x++)
+        {
+            for (int y = startY; y <= endY; y++)
+            {
+                GridCoord tile = new GridCoord(x, y);
+
+                if (WorldTerrain.IsOutOfBounds(tile) == true)
+                    continue;
+
+                if (tile == coord && includeCentre == false)
+                    continue;
+
+                if (GridCoord.GridManhattanDistance(coord, tile) <= radius)
                     tiles.Add(tile);
             }
         }
@@ -294,11 +327,13 @@ public class WorldPositions
         int endX = coord.X + radius;
         int endY = coord.Y + radius;
 
-        for (int x = startX; x < endX; x++)
+        // Optimization to use with GridSqrDistance(), which uses the squared distance
+        float distance = radius * radius;
+
+        for (int x = startX; x <= endX; x++)
         {
-            for (int y = startY; y < endY; y++)
+            for (int y = startY; y <= endY; y++)
             {
-                int dist = Mathf.Abs(coord.X - x) + Mathf.Abs(coord.Y - y);
                 GridCoord tile = new GridCoord(x, y);
 
                 if (WorldTerrain.IsOutOfBounds(tile) == true || WorldTerrain.IsLand(tile) == false)
@@ -307,7 +342,35 @@ public class WorldPositions
                 if (tile == coord && includeCentre == false)
                     continue;
 
-                if (GridCoord.GridDistance(coord, tile) <= radius)
+                if (GridCoord.GridSqrDistance(coord, tile) <= distance)
+                    tiles.Add(tile);
+            }
+        }
+
+        return tiles;
+    }
+
+    static public List<GridCoord> GetLandWithinManhattanDistance(GridCoord coord, int radius, bool includeCentre = true)
+    {
+        List<GridCoord> tiles = new List<GridCoord>();
+        int startX = coord.X - radius;
+        int startY = coord.Y - radius;
+        int endX = coord.X + radius;
+        int endY = coord.Y + radius;
+
+        for (int x = startX; x <= endX; x++)
+        {
+            for (int y = startY; y <= endY; y++)
+            {
+                GridCoord tile = new GridCoord(x, y);
+
+                if (WorldTerrain.IsOutOfBounds(tile) == true || WorldTerrain.IsLand(tile) == false)
+                    continue;
+
+                if (tile == coord && includeCentre == false)
+                    continue;
+
+                if (GridCoord.GridManhattanDistance(coord, tile) <= radius)
                     tiles.Add(tile);
             }
         }

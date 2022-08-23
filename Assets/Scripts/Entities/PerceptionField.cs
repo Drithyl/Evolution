@@ -9,19 +9,19 @@ public class PerceptionField
     private List<GridCoord> tiles;
     private List<GridCoord> landTiles;
 
-    private SortedList<int, List<GridCoord>> shoreTiles = new SortedList<int, List<GridCoord>>
+    private SortedList<float, List<GridCoord>> shoreTiles = new SortedList<float, List<GridCoord>>
     (
-        new IntAscendingOrderComparer()
+        new FloatAscendingOrderComparer()
     );
 
-    private SortedList<int, List<GridCoord>> foodTiles = new SortedList<int, List<GridCoord>>
+    private SortedList<float, List<GridCoord>> foodTiles = new SortedList<float, List<GridCoord>>
     (
-        new IntAscendingOrderComparer()
+        new FloatAscendingOrderComparer()
     );
 
-    private SortedList<int, List<Creature>> creatures = new SortedList<int, List<Creature>>
+    private SortedList<float, List<Creature>> creatures = new SortedList<float, List<Creature>>
     (
-        new IntAscendingOrderComparer()
+        new FloatAscendingOrderComparer()
     );
 
     public bool IsCreatureInSight
@@ -163,7 +163,7 @@ public class PerceptionField
 
         foreach (GridCoord tile in tiles)
         {
-            int dist = GridCoord.GridDistance(centre, tile);
+            float dist = GridCoord.GridSqrDistance(centre, tile);
 
             if (WorldTerrain.IsTileShore(tile) == true)
                 AddToSortedListOfLists(shoreTiles, dist, tile);
@@ -183,6 +183,12 @@ public class PerceptionField
             //Debug.Log("Creature found at " + tile.ToString() + " (" + dist + ") distance");
             AddToSortedListOfLists(creatures, dist, creature);
         }
+    }
+
+    private void DebugPerception(List<GridCoord> tiles)
+    {
+        foreach (GridCoord tile in tiles)
+            Debug.DrawRay(WorldPositions.GetTileCentre(tile), Vector3.up, Color.red, GameManager.Instance.TimeBetweenTurns + 0.1f);
     }
 
     // Externalize to static helper

@@ -12,6 +12,7 @@ public class AgeGene : Gene
     private int _maxAge;
     public int MaxAge { get { return _maxAge; } }
 
+
     [SerializeField]
     private int _maturityAge;
     public int MaturityAge { get { return _maturityAge; } }
@@ -20,6 +21,16 @@ public class AgeGene : Gene
     [SerializeField]
     private int _currentAge = 0;
     public int CurrentAge { get { return _currentAge; } }
+
+
+    [SerializeField]
+    private float _matingUrge = 0;
+    public float MatingUrge { get { return _matingUrge; } }
+
+
+    [SerializeField]
+    private float _currentMatingUrge = 0;
+    public float CurrentMatingUrge { get { return _currentMatingUrge; } }
 
 
     [SerializeField]
@@ -50,7 +61,19 @@ public class AgeGene : Gene
 
 
     public bool HasMate { get { return TargetMate != null; } }
+    public bool IsMature { get { return CurrentAge >= MaturityAge; } }
     public bool NeedsToMate { get { return AlreadyMated == false && _currentAge >= _maturityAge && _isMating == false; } }
+
+    override public float UrgeLevel
+    {
+        get
+        {
+            if (IsMature == false)
+                return 0;
+
+            return CurrentMatingUrge;
+        }
+    }
 
 
     override public string Name { get { return "Age"; } }
@@ -61,14 +84,15 @@ public class AgeGene : Gene
         statistics = GetComponent<Statistics>();
 
         Randomize();
-        _maturityAge = (int)(_maxAge * 0.5f);
+        _currentMatingUrge = MatingUrge;
     }
 
     public override void Randomize()
     {
         _maxAge = Random.Range(30, 40);
         _maxOffspring = Random.Range(1, 4);
-        _maturityAge = Mathf.FloorToInt(_maxAge * Random.Range(0.2f, 0.4f));
+        _matingUrge = Random.Range(0.4f, 0.8f);
+        _maturityAge = Mathf.FloorToInt(_maxAge * Random.Range(0.1f, 0.2f));
         _secondsToCompleteMating = GameManager.Instance.TimeBetweenTurns * Random.Range(0.75f, 1.25f);
     }
 
@@ -77,6 +101,7 @@ public class AgeGene : Gene
         AgeGene inheritedAgeGene = inheritedGene as AgeGene;
 
         _maxAge = inheritedAgeGene.MaxAge;
+        _matingUrge = inheritedAgeGene.MatingUrge;
         _maxOffspring = inheritedAgeGene.MaxOffspring;
         _maturityAge = inheritedAgeGene.MaturityAge;
         _secondsToCompleteMating = inheritedAgeGene.SecondsToCompleteMating;
@@ -85,13 +110,29 @@ public class AgeGene : Gene
     public override void PointMutate()
     {
         int maxAgeMutatePercent = Mathf.FloorToInt(Mathf.Max(1, MaxAge * 0.1f));
+        float matingUrgeMutatePercent = MatingUrge * 0.1f;
         int maturityAgeMutatePercent = Mathf.FloorToInt(Mathf.Max(1, MaturityAge * 0.1f));
         float matingDurationMutatePercent = SecondsToCompleteMating * 0.1f;
 
         _maxAge = Mathf.Max(5, MaxAge + Random.Range(-maxAgeMutatePercent, maxAgeMutatePercent));
         _maxOffspring = Mathf.Max(1, MaxOffspring + Random.Range(-1, 2));
+        _matingUrge = Mathf.Clamp01(MatingUrge + Random.Range(-matingUrgeMutatePercent, matingUrgeMutatePercent));
         _maturityAge = Mathf.Max(1, MaxAge + Random.Range(-maturityAgeMutatePercent, maturityAgeMutatePercent));
         _secondsToCompleteMating = Mathf.Max(1, SecondsToCompleteMating + Random.Range(-matingDurationMutatePercent, matingDurationMutatePercent));
+    }
+
+    public bool CanStartMating()
+    {
+        if (NeedsToMate == false)
+            return false;
+
+        if (IsMating == true)
+            return false;
+
+        if (HasMate == false)
+            return false;
+
+        return GridCoord.AreAdjacent(parent.Position, _targetMate.Position);
     }
 
     public void GrowOld()
@@ -118,6 +159,7 @@ public class AgeGene : Gene
             return;
 
         _targetMate = closestMate;
+        parent.SetStatusText("Moving to Mate");
 
         if (movementGene != null)
         {
@@ -128,9 +170,9 @@ public class AgeGene : Gene
 
     public void StartMating()
     {
-        Debug.Log("Started Mating");
         _isMating = true;
         matingProgress = 0;
+        parent.SetStatusText("Started Mating");
     }
 
     public void Mate()
@@ -144,7 +186,7 @@ public class AgeGene : Gene
             return;
         }
 
-        Debug.Log("Mating");
+        parent.SetStatusText("Mating");
 
         if (movementGene != null)
             movementGene.ClearMovePath();
@@ -157,14 +199,16 @@ public class AgeGene : Gene
 
     private void FinishMating()
     {
-        Debug.Log("Finished Mating");
         AgeGene partnerGene = _targetMate.GetComponent<AgeGene>();
 
         partnerGene.IsMating = false;
-        partnerGene.AlreadyMated = true;
+        //partnerGene.AlreadyMated = true;
+        parent.SetStatusText("Finishing Mating");
 
         _isMating = false;
-        _alreadyMated = true;
+        //_alreadyMated = true;
+
+        _currentMatingUrge = Mathf.Clamp01(_currentMatingUrge - (_matingUrge * 0.1f));
 
         int numberOfChildren = Random.Range(1, MaxOffspring + 1);
 

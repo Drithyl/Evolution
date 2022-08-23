@@ -146,8 +146,8 @@ public class TerrainMesh
 
     private void UpdateColours(Material material)
     {
-        Color[] startCols = BiomeManager.GetStartColours();
-        Color[] endCols = BiomeManager.GetEndColours();
+        Color[] startCols = BiomeManager.Instance.GetStartColours();
+        Color[] endCols = BiomeManager.Instance.GetEndColours();
         material.SetColorArray("_StartCols", startCols);
         material.SetColorArray("_EndCols", endCols);
     }
@@ -338,8 +338,8 @@ public class TerrainMesh
     Vector2 GetBiomeMappedUVAtHeight(float height)
     {
         // Find current biome
-        int biomeIndex = BiomeManager.GetBiomeIndexAtHeight(height);
-        float mappedHeight = BiomeManager.GetBiomeMappedHeight(height, biomeIndex);
+        int biomeIndex = BiomeManager.Instance.GetBiomeIndexAtHeight(height);
+        float mappedHeight = BiomeManager.Instance.GetBiomeMappedHeight(height, biomeIndex);
 
         // UV stores x: biomeIndex and y: val between 0 and 1 for how close to prev/next biome
         Vector2 uv = new Vector2(biomeIndex, mappedHeight);

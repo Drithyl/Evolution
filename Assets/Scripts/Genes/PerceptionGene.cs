@@ -16,6 +16,7 @@ public class PerceptionGene : Gene
     public PerceptionField Perception { get { return _perception; } }
 
 
+    public override float UrgeLevel => 0;
     override public string Name { get { return "Perception"; } }
 
     private void Awake()
@@ -26,7 +27,7 @@ public class PerceptionGene : Gene
 
     public override void Randomize()
     {
-        _distance = Random.Range(4f, 7f);
+        _distance = Random.Range(5f, 7f);
     }
 
     public override void Inherit(Gene inheritedGene)

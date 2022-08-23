@@ -108,16 +108,29 @@ public class GlobalStatistics : MonoBehaviour
     public string MostCommonCauseOfDeath { get { return _mostCommonCauseOfDeath; } }
 
 
+    public WindowGraph[] graphs;
+    public DataLineRenderer[] graphLines;
+
+
     private void Awake()
     {
         EnsureSingleton();
         Array deathTypes = Enum.GetValues(typeof(CauseOfDeath));
         causeOfDeathCounters = new int[deathTypes.Length];
+        graphLines = new DataLineRenderer[]
+        {
+            graphs[0].AddDataLineGraphic(0.2f)
+        };
     }
 
     private void OnValidate()
     {
         EnsureSingleton();
+    }
+
+    public void UpdateMonthlyStatistics()
+    {
+        graphLines[0].AddDataPoint(GameManager.Instance.NumberOfCreatures);
     }
 
     public void RecordCreatureStatistics(Statistics statistics)

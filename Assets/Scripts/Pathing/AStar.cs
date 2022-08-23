@@ -69,9 +69,9 @@ public class AStar
             {
                 // ...find its distance to the start point, and to the end point
                 //Debug.Log("***Neighbour " + neighbour.ToString() + "***");
-                float startToNeighbourDistance = gScores[current.XY] + GridCoord.GridDistance(current, neighbour);
+                float startToNeighbourDistance = gScores[current.XY] + GridCoord.GridSqrDistance(current, neighbour);
                 //Debug.Log("startToNeighbourDistance: " + startToNeighbourDistance);
-                float neighbourToEndDistance = GridCoord.GridDistance(neighbour, end);
+                float neighbourToEndDistance = GridCoord.GridSqrDistance(neighbour, end);
                 //Debug.Log("neighbourToEndDistance: " + neighbourToEndDistance);
                 //float fullPathDistance = startToNeighbourDistance + neighbourToEndDistance;
                 //Debug.Log("fullPathDistance: " + fullPathDistance);
@@ -140,11 +140,17 @@ public class InsertionOrderComparer : IComparer<Vector2>
     }
 }
 
-public class AscendingOrderComparer : IComparer<float>
+public class FloatAscendingOrderComparer : IComparer<float>
 {
     public int Compare(float a, float b)
     {
-        return (int)(a - b);
+        if (a < b)
+            return -1;
+
+        if (a > b)
+            return 1;
+
+        return 0;
     }
 }
 

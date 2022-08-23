@@ -13,8 +13,6 @@ public class CreatureSpawner : MonoBehaviour
 
     public GameObject[] creaturePrefabs;
 
-    static private GameObject[] _creaturePrefabs;
-
 
     [Header("Spawn Creature Through Inspector")]
     public Species speciesToSpawn;
@@ -24,13 +22,6 @@ public class CreatureSpawner : MonoBehaviour
     private void Awake()
     {
         EnsureSingleton();
-
-        _creaturePrefabs = new GameObject[creaturePrefabs.Length];
-
-        // Fill our static array of creature prefabs to be able to
-        // spawn them through static methods
-        for (int i = 0; i < creaturePrefabs.Length; i++)
-            _creaturePrefabs[i] = creaturePrefabs[i];
     }
 
     private void OnValidate()

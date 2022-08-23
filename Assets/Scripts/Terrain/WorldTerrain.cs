@@ -123,7 +123,7 @@ abstract public class WorldTerrain
 
     static public bool IsLand(int x, int y)
     {
-        return BiomeManager.IsLand(GetHeight(x, y));
+        return BiomeManager.Instance.IsLand(GetHeight(x, y));
     }
 
     
@@ -145,7 +145,7 @@ abstract public class WorldTerrain
 
     static public bool IsWater(int x, int y)
     {
-        return BiomeManager.IsWater(GetHeight(x, y));
+        return BiomeManager.Instance.IsWater(GetHeight(x, y));
     }
 
 

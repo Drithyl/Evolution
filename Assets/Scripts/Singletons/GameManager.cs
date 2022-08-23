@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     static public GameManager Instance { get; private set; }
 
+    [ReadOnly]
     public bool headlessMode = false;
 
     [Tooltip("Real-time seconds in-between game turns. Lower value, faster simulation.")]
@@ -40,6 +41,11 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int foodDecayPerMonth = -1;
 
+    [Tooltip("Number of starting creatures in the world.")]
+    [Range(0, 100)]
+    [SerializeField]
+    private int numOfStartingCreatures = 30;
+
     [ReadOnly]
     [SerializeField]
     private float _time;
@@ -55,12 +61,31 @@ public class GameManager : MonoBehaviour
     private List<Creature> creatures = new List<Creature>();
     private List<Creature> creaturesAddQueue = new List<Creature>();
     private List<Creature> creaturesRemoveQueue = new List<Creature>();
+    public int NumberOfCreatures { get { return creatures.Count; } }
+
 
     private List<Food> foodSupply = new List<Food>();
+    public int NumberOfFood { get { return foodSupply.Count; } }
+
 
     private void Awake()
     {
         EnsureSingleton();
+    }
+
+    private void Start()
+    {
+        TerrainGenerator.Instance.Initialize();
+
+
+        for (int i = 0; i < numOfStartingCreatures; i++)
+        {
+            CreatureSpawner.Instance.Spawn(
+                CreatureSpawner.Instance.speciesToSpawn,
+                CreatureSpawner.Instance.x,
+                CreatureSpawner.Instance.y
+            );
+        }
     }
 
     private void OnValidate()
@@ -78,6 +103,7 @@ public class GameManager : MonoBehaviour
         {
             GrowFood();
             SpreadFood(chanceOfFoodToSpawn);
+            GlobalStatistics.Instance.UpdateMonthlyStatistics();
         }
 
         foreach (Creature creature in creatures)
@@ -92,7 +118,7 @@ public class GameManager : MonoBehaviour
                 movementGene.AnimateMove();
 
             if (isNewTurn == true)
-                GeneManager.Instance.UpdateBehaviour(creature);
+                GeneManager.Instance.UpdateImpulse(creature);
         }
 
         UpdateCreatureList();

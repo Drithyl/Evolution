@@ -34,6 +34,7 @@ class ThirstGene : Gene
     private bool _isThirsty;
     public bool IsThirsty { get { return _isThirsty; } }
     public bool HasStarved { get { return _currentThirst <= 0; } }
+    override public float UrgeLevel => 1 - (CurrentThirst / (float)MaxThirst);
 
     override public string Name { get { return "Thirst"; } }
 
@@ -91,6 +92,7 @@ class ThirstGene : Gene
 
         _currentThirst += waterDrunk;
         statistics.WaterDrunk += waterDrunk;
+        parent.SetStatusText("Drinking");
 
         if (IsFull == true)
             _isSeekingWater = false;
@@ -101,6 +103,7 @@ class ThirstGene : Gene
         MovementGene movementGene = GetComponent<MovementGene>();
 
         _isSeekingWater = true;
+        parent.SetStatusText("Moving to shore");
 
         if (movementGene != null)
         {

@@ -73,9 +73,29 @@ public struct GridCoord
         get { return new GridCoord(0, 1); }
     }
 
+    public static GridCoord NorhtWestward
+    {
+        get { return new GridCoord(-1, 1); }
+    }
+
+    public static GridCoord NorthEastward
+    {
+        get { return new GridCoord(1, 1); }
+    }
+
     public static GridCoord Southward
     {
         get { return new GridCoord(0, -1); }
+    }
+
+    public static GridCoord SouthWestward
+    {
+        get { return new GridCoord(-1, -1); }
+    }
+
+    public static GridCoord SouthEastward
+    {
+        get { return new GridCoord(1, -1); }
     }
 
     public static GridCoord Westward
@@ -88,14 +108,46 @@ public struct GridCoord
         get { return new GridCoord(1, 0); }
     }
 
-    public static int GridDistance(GridCoord start, GridCoord end)
+    public static int GridManhattanDistance(GridCoord start, GridCoord end)
     {
         return Mathf.Abs(start.X - end.X) + Mathf.Abs(start.Y - end.Y);
     }
 
+    public static float GridDistance(GridCoord start, GridCoord end)
+    {
+        return Vector2.Distance(start.XY, end.XY);
+    }
+
+    public static float GridSqrDistance(GridCoord start, GridCoord end)
+    {
+        return ((end.x - start.x) * (end.x - start.x)) + ((end.y - start.y) * (end.y - start.y));
+    }
+
+    public static bool AreOrthogonallyAdjacent(GridCoord a, GridCoord b)
+    {
+        int xDiff = Mathf.Abs(a.X - b.X);
+        int yDiff = Mathf.Abs(a.Y - b.Y);
+        int sumDiff = xDiff + yDiff;
+
+        return sumDiff == 1;
+    }
+
     public static bool AreAdjacent(GridCoord a, GridCoord b)
     {
-        return GridDistance(a, b) == 1;
+        int xDiff = Mathf.Abs(a.X - b.X);
+        int yDiff = Mathf.Abs(a.Y - b.Y);
+        int sumDiff = xDiff + yDiff;
+
+        if (sumDiff > 2)
+            return false;
+
+        if (sumDiff < 1)
+            return false;
+
+        if (xDiff > 1 || yDiff > 1)
+            return false;
+
+        return true;
     }
 
     public static Vector3 DirectionFromTo(GridCoord a, GridCoord b)
@@ -133,7 +185,7 @@ public struct GridCoord
         throw new Exception("Coord provided is not an adjacent neighbour to this!");
     }
 
-    public GridCoord[] GetNeighbours()
+    public GridCoord[] GetOrthogonalNeighbours()
     {
         return new GridCoord[]
         {
@@ -141,6 +193,21 @@ public struct GridCoord
             EastCoord,
             SouthCoord,
             WestCoord
+        };
+    }
+
+    public GridCoord[] GetNeighbours()
+    {
+        return new GridCoord[]
+        {
+            NorthCoord,
+            NorthEastCoord,
+            EastCoord,
+            SouthEastCoord,
+            SouthCoord,
+            SouthWestCoord,
+            WestCoord,
+            NorthWestCoord
         };
     }
 
@@ -164,6 +231,34 @@ public struct GridCoord
     }
 
 
+    public GridCoord NorthWestCoord
+    {
+        get { return new GridCoord(x - 1, y + 1); }
+    }
+
+    public bool IsNorthWestFrom(GridCoord coord)
+    {
+        if (x < coord.X && y > coord.Y)
+            return true;
+
+        return false;
+    }
+
+
+    public GridCoord NorthEastCoord
+    {
+        get { return new GridCoord(x + 1, y + 1); }
+    }
+
+    public bool IsNorthEastFrom(GridCoord coord)
+    {
+        if (x > coord.X && y > coord.Y)
+            return true;
+
+        return false;
+    }
+
+
     public GridCoord SouthCoord
     {
         get { return new GridCoord(x, y - 1); }
@@ -180,6 +275,34 @@ public struct GridCoord
     public Vector3 SouthEdgeDirection
     {
         get { return Vector3.back; }
+    }
+
+
+    public GridCoord SouthWestCoord
+    {
+        get { return new GridCoord(x - 1, y - 1); }
+    }
+
+    public bool IsSouthWestFrom(GridCoord coord)
+    {
+        if (x < coord.X && y < coord.Y)
+            return true;
+
+        return false;
+    }
+
+
+    public GridCoord SouthEastCoord
+    {
+        get { return new GridCoord(x + 1, y - 1); }
+    }
+
+    public bool IsSouthEastFrom(GridCoord coord)
+    {
+        if (x > coord.X && y < coord.Y)
+            return true;
+
+        return false;
     }
 
 

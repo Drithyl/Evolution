@@ -33,6 +33,7 @@ public class HungerGene : Gene
     private bool _isHungry;
     public bool IsHungry { get { return _isHungry; } }
     public bool HasStarved { get { return _currentHunger <= 0; } }
+    override public float UrgeLevel => 1 - (CurrentHunger / (float)MaxHunger);
 
 
     override public string Name { get { return "Hunger"; } }
@@ -96,6 +97,7 @@ public class HungerGene : Gene
 
         _currentHunger += nutrition;
         statistics.FoodConsumed += nutrition;
+        parent.SetStatusText("Eating");
 
         if (IsFull == true)
             _isSeekingFood = false;
@@ -106,6 +108,7 @@ public class HungerGene : Gene
         MovementGene movementGene = GetComponent<MovementGene>();
 
         _isSeekingFood = true;
+        parent.SetStatusText("Moving to Food");
 
         if (movementGene != null)
         {

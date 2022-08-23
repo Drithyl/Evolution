@@ -49,7 +49,7 @@ public class TerrainGenerator : MonoBehaviour
         EnsureSingleton();
     }
 
-    private void Start()
+    public void Initialize()
     {
         if (needsUpdate == true && autoUpdate == true)
         {

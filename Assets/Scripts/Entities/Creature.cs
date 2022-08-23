@@ -7,6 +7,7 @@ public class Creature : MonoBehaviour
 {
     public Material femaleMaterial;
     public Material maleMaterial;
+    public TMPro.TextMeshPro statusTextMesh;
 
 
     [ReadOnly]
@@ -32,6 +33,7 @@ public class Creature : MonoBehaviour
 
 
     private Gene[] genome;
+    public Gene[] Genome => genome;
     public int GeneNumber { get { return genome.Length; } }
 
     private Statistics statistics;
@@ -72,6 +74,22 @@ public class Creature : MonoBehaviour
         //Debug.Log("Creature created at " + position.ToString());
     }
 
+    public void SetStatusText(string statusText)
+    {
+        if (statusTextMesh == null)
+            return;
+
+        statusTextMesh.text = statusText;
+    }
+
+    public void ClearStatusText()
+    {
+        if (statusTextMesh == null)
+            return;
+
+        statusTextMesh.text = "";
+    }
+
     public void Mutate(float chanceOfGeneMutation)
     {
         foreach (Gene gene in genome)
@@ -84,15 +102,16 @@ public class Creature : MonoBehaviour
         _isDying = true;
         Destroy(gameObject);
         statistics.DeathCausedBy = causeOfDeath;
+        SetStatusText("Dying of " + causeOfDeath.ToString());
         GlobalStatistics.Instance.RecordCreatureStatistics(statistics);
-        Debug.Log("Died of: " + causeOfDeath.ToString());
+        //Debug.Log("Died of: " + causeOfDeath.ToString());
     }
 
     public void InheritGenome(Gene[] inheritedGenome)
     {
         for (int i = 0; i < genome.Length; i++)
         {
-            Debug.Log("Inheriting " + inheritedGenome[i].ToString() + " in " + genome[i].ToString());
+            //Debug.Log("Inheriting " + inheritedGenome[i].ToString() + " in " + genome[i].ToString());
             genome[i].Inherit(inheritedGenome[i]);
         }
     }
