@@ -6,15 +6,16 @@ More details on the goals of the project can be found in my [midterm report](htt
 
 ## Current Progress
 
-### Basic functionality in place:
-
 * Procedural terrain generation through Unity's Perlin Noise and programmatic mesh creation.
 * One species of creatures (male/female) who grow old, feed, drink and reproduce. Food in the world gets consumed and grows back.
 * Series of Gene components with randomized values that are passed down to children by splicing the father and mother's genome in random ratios.
+* Behaviour of creatures is determined by urge levels, some of which are genetic-related, like the urge to seek mates.
 * Individual and global statistics for better feedback: tiles walked, months aged, food and water consumed, causes of death, etc.
+* Working line graphs as 3d objects in the world to display feedback. At the moment, only population line graph is active.
 
 
 ## Next Steps
 
-* Gene mutation to each new generation to simulate actual evolution, rather than just inheritance of parent values.
+* Tuning urge-driven behaviour to make sense. Currently once creatures reach maturity, they will barely ever stop breeding.
+* Creating more working graphs to display other statistics like average values of genes.
 * New carnivore species that prey on the herbivores to add a more active threat and means of population control.
