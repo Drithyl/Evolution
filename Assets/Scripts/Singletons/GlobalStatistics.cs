@@ -92,6 +92,36 @@ public class GlobalStatistics : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
+    private int _totalMembers;
+    public int TotalMembers
+    {
+        get { return _totalMembers; }
+        set { _totalMembers = value; }
+    }
+
+
+    [ReadOnly]
+    [SerializeField]
+    private int _totalDeaths;
+    public int TotalDeaths
+    {
+        get { return _totalDeaths; }
+        set { _totalDeaths = value; }
+    }
+
+
+    [ReadOnly]
+    [SerializeField]
+    private int _totalDeathsDuringPregnancy;
+    public int TotalDeathsDuringPregnancy
+    {
+        get { return _totalDeathsDuringPregnancy; }
+        set { _totalDeathsDuringPregnancy = value; }
+    }
+
+
+    [ReadOnly]
+    [SerializeField]
     private int _totalChildren;
     public int TotalChildren
     {
@@ -135,8 +165,10 @@ public class GlobalStatistics : MonoBehaviour
 
     public void RecordCreatureStatistics(Statistics statistics)
     {
+        _totalDeaths++;
         creatureStatistics.Add(statistics);
         causeOfDeathCounters[(int)statistics.DeathCausedBy]++;
+
         UpdateMostCommonCauseOfDeath();
     }
 

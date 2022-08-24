@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: -1489980883524175487}
   - component: {fileID: -863317858327892833}
   - component: {fileID: -1046794670956909613}
+  - component: {fileID: 844514888118729459}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -183,6 +184,7 @@ MonoBehaviour:
   _maturityAge: 0
   _currentAge: 0
   _matingUrge: 0
+  _currentMatingUrge: 0
   _maxOffspring: 0
   _secondsToCompleteMating: 0
   matingProgress: 0
@@ -216,6 +218,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _distance: 0
+--- !u!114 &844514888118729459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974381062715291377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6a47c1bae73f7f4f80dfb653041ea34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8600913409972993128
 GameObject:
   m_ObjectHideFlags: 0

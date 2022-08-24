@@ -46,13 +46,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int numOfStartingCreatures = 30;
 
-    [ReadOnly]
+    [Tooltip("Pauses the time when there are no creatures left.")]
     [SerializeField]
-    private float _time;
+    private bool pauseTimeWhenNoCreatures = true;
 
     [ReadOnly]
     [SerializeField]
-    private float _nextTurnTimestamp;
+    private float _time;
 
     [ReadOnly]
     [SerializeField]
@@ -67,6 +67,13 @@ public class GameManager : MonoBehaviour
     private List<Food> foodSupply = new List<Food>();
     public int NumberOfFood { get { return foodSupply.Count; } }
 
+
+    private bool _isNewTurn;
+    public bool IsNewTurn => _isNewTurn;
+
+
+    private bool _isNewMonth;
+    public bool IsNewMonth => _isNewMonth;
 
     private void Awake()
     {
@@ -95,11 +102,15 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        AdvanceTime();
-        bool isNewTurn = CheckIfNewTurn();
-        bool isNewMonth = CheckIfNewMonth();
+        if (creatures.Count <= 0 && creaturesAddQueue.Count <= 0 && pauseTimeWhenNoCreatures == true)
+            return;
 
-        if (isNewMonth == true)
+
+        AdvanceTime();
+        _isNewTurn = CheckIfNewTurn();
+        _isNewMonth = CheckIfNewMonth();
+
+        if (IsNewMonth == true)
         {
             GrowFood();
             SpreadFood(chanceOfFoodToSpawn);
@@ -111,13 +122,13 @@ public class GameManager : MonoBehaviour
             AgeGene ageGene = creature.GetComponent<AgeGene>();
             MovementGene movementGene = creature.GetComponent<MovementGene>();
 
-            if (isNewMonth == true && ageGene != null)
+            if (IsNewMonth == true && ageGene != null)
                 ageGene.GrowOld();
 
             if (movementGene != null && movementGene.IsMoving == true)
                 movementGene.AnimateMove();
 
-            if (isNewTurn == true)
+            if (IsNewTurn == true)
                 GeneManager.Instance.UpdateImpulse(creature);
         }
 

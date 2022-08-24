@@ -63,11 +63,33 @@ public class PerceptionField
         }
     }
 
+    public bool IsEmptyShoreTileInSight
+    {
+        get
+        {
+            return 
+                shoreTiles.Count >= 1 && 
+                shoreTiles.Values[0].Count >= 1 && 
+                WorldPositions.HasCreatureAt(shoreTiles.Values[0][0]);
+        }
+    }
+
     public bool IsFoodInSight
     {
         get
         {
             return foodTiles.Count >= 1 && foodTiles.Values[0].Count >= 1;
+        }
+    }
+
+    public bool IsFreeFoodInSight
+    {
+        get
+        {
+            return 
+                foodTiles.Count >= 1 && 
+                foodTiles.Values[0].Count >= 1 &&
+                WorldPositions.HasCreatureAt(foodTiles.Values[0][0]);
         }
     }
 
@@ -134,12 +156,27 @@ public class PerceptionField
             return shoreTiles.Values[0][0];
         }
     }
+    public GridCoord ClosestFreeShoreTile
+    {
+        get
+        {
+            return shoreTiles.Values[0].Find(x => WorldPositions.HasCreatureAt(x) == false);
+        }
+    }
 
     public GridCoord ClosestFoodTile
     {
         get
         {
             return foodTiles.Values[0][0];
+        }
+    }
+
+    public GridCoord ClosestFreeFoodTile
+    {
+        get
+        {
+            return foodTiles.Values[0].Find(x => WorldPositions.HasCreatureAt(x) == false);
         }
     }
 

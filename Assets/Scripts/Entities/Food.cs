@@ -6,11 +6,11 @@ public class Food : MonoBehaviour
 {
     [Tooltip("The scale of the object will be this times the amount of food in it")]
     [Range(0.01f, 0.1f)]
-    public float scaleMultiplier = 0.02f;
+    public float scaleMultiplier = 0.015f;
 
     [Tooltip("Max scale that the food will grow to")]
-    [Range(0.01f, 0.1f)]
-    public float maxScale = 1;
+    [Range(0.3f, 1)]
+    public float maxScale = 0.8f;
 
     [SerializeField]
     private int maxAmount;
@@ -30,7 +30,7 @@ public class Food : MonoBehaviour
 
     public void Initialize(GridCoord foodPosition)
     {
-        maxAmount = Random.Range(20, 30);
+        maxAmount = Random.Range(5, 15);
         amount = maxAmount;
         _reachedFullGrowth = true;
         ScaleWithAmountLeft();

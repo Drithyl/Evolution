@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class ThirstGene : Gene
+public class ThirstGene : Gene
 {
     private Creature parent;
     private Statistics statistics;
@@ -60,9 +60,25 @@ class ThirstGene : Gene
             parent.Die(CauseOfDeath.Thirst);
     }
 
+    public void IncreaseThirst(float ratio)
+    {
+        _currentThirst -= Mathf.FloorToInt(MaxThirst * ratio);
+
+        if (HasStarved == true)
+            parent.Die(CauseOfDeath.Thirst);
+    }
+
+    public void SetThirstAtRatio(float ratio)
+    {
+        _currentThirst = Mathf.FloorToInt(MaxThirst * ratio);
+
+        if (HasStarved == true)
+            parent.Die(CauseOfDeath.Thirst);
+    }
+
     public override void Randomize()
     {
-        _maxThirst = Random.Range(15, 30);
+        _maxThirst = Random.Range(10, 30);
         _mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxThirst * 0.3f), Mathf.FloorToInt(_maxThirst * 0.5f));
     }
 
@@ -101,6 +117,15 @@ class ThirstGene : Gene
     public void SeekWater(PerceptionGene perceptionGene)
     {
         MovementGene movementGene = GetComponent<MovementGene>();
+        GridCoord shoreTile;
+
+        if (perceptionGene.Perception.IsShoreTileInSight == false)
+            return;
+
+        shoreTile = perceptionGene.Perception.ClosestFreeShoreTile;
+
+        if (shoreTile == null)
+            return;
 
         _isSeekingWater = true;
         parent.SetStatusText("Moving to shore");

@@ -78,14 +78,24 @@ public class MovementGene : Gene
 
     public void ClearMovePath()
     {
-        _moveQueue.Clear();
+        if (_moveQueue != null)
+            _moveQueue.Clear();
+
+        else _moveQueue = new List<GridCoord>();
     }
 
     public void Explore(PerceptionGene perceptionGene)
     {
         GridCoord randomTile = perceptionGene.Perception.RandomEmptyLandTile;
-        _moveQueue = AStar.GetShortestPath(parent.Position, randomTile);
+        List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile);
 
+        if (path == null)
+        {
+            Debug.Log("Invalid path found to explore; ignoring");
+            return;
+        }
+
+        _moveQueue = path;
         parent.SetStatusText("Exploring to " + randomTile.ToString());
         //Debug.Log("Exploring towards tile " + randomTile.ToString());
 

@@ -20,9 +20,9 @@ public class GeneManager : MonoBehaviour
     {
         ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
         HungerGene hungerGene = creature.GetComponent<HungerGene>();
-        AgeGene ageGene = creature.GetComponent<AgeGene>();
         PerceptionGene perceptionGene = creature.GetComponent<PerceptionGene>();
         MovementGene movementGene = creature.GetComponent<MovementGene>();
+        ReproductionGene reproductionGene = creature.GetComponent<ReproductionGene>();
 
         Gene mostUrgentImpulse;
         creature.ClearStatusText();
@@ -32,14 +32,21 @@ public class GeneManager : MonoBehaviour
         if (creature.IsDying == true)
             return;
 
+        // PREGNANCY CONTINUES EVERY TURN REGARDLESS OF ACTIONS
+        if (reproductionGene != null && creature.IsFemale == true && reproductionGene.IsPregnant == true)
+            reproductionGene.ContinuePregnancy();
+
         if (movementGene != null && movementGene.IsMoving == true)
             return;
 
 
         // ONGOING ACTIONS THAT MAY CONTINUE
-        if (ageGene != null && ageGene.IsMating == true)
+        if (reproductionGene != null && reproductionGene.IsMating == true)
         {
-            ageGene.Mate();
+            if (creature.IsFemale == true)
+                reproductionGene.matingSession.ContinueSession();
+
+            // Male does not control session but is still locked into it
             return;
         }
 
@@ -61,30 +68,34 @@ public class GeneManager : MonoBehaviour
 
 
         // NEW ACTIONS
-        mostUrgentImpulse = GetMostUrgentImpulse(creature);
-        Debug.Log("Most urgent impulse: " + mostUrgentImpulse.ToString() + " at " + mostUrgentImpulse.UrgeLevel);
+        mostUrgentImpulse = creature.Genome.GetMostUrgentImpulse();
 
-        if (mostUrgentImpulse == ageGene)
+        if (mostUrgentImpulse.UrgeLevel > 0)
         {
-            if (ageGene.CanStartMating() == true)
+            //Debug.Log("Most urgent impulse: " + mostUrgentImpulse.ToString() + " at " + mostUrgentImpulse.UrgeLevel);
+            
+            if (mostUrgentImpulse == reproductionGene)
             {
-                ageGene.StartMating();
-                return;
+                Debug.Log("Mating urge is highest");
+
+                // Males begin the mating session
+                if (creature.IsFemale == false && reproductionGene.CanStartMating() == true)
+                {
+                    reproductionGene.StartMating();
+                    return;
+                }
+
+                else if (perceptionGene != null)
+                {
+                    Debug.Log("Seeking new mate");
+                    reproductionGene.SeekMate(perceptionGene);
+                }
             }
 
-            else if (perceptionGene != null)
-                ageGene.SeekMate(perceptionGene);
-        }
-
-        else if (mostUrgentImpulse == hungerGene && perceptionGene != null)
-        {
-            if (perceptionGene.Perception.IsFoodInSight == true)
+            else if (mostUrgentImpulse == hungerGene && perceptionGene != null)
                 hungerGene.SeekFood(perceptionGene);
-        }
 
-        else if (mostUrgentImpulse == thirstGene && perceptionGene != null)
-        {
-            if (perceptionGene.Perception.IsShoreTileInSight == true)
+            else if (mostUrgentImpulse == thirstGene && perceptionGene != null)
                 thirstGene.SeekWater(perceptionGene);
         }
 
@@ -104,9 +115,9 @@ public class GeneManager : MonoBehaviour
     {
         ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
         HungerGene hungerGene = creature.GetComponent<HungerGene>();
-        AgeGene ageGene = creature.GetComponent<AgeGene>();
         PerceptionGene perceptionGene = creature.GetComponent<PerceptionGene>();
         MovementGene movementGene = creature.GetComponent<MovementGene>();
+        ReproductionGene reproductionGene = creature.GetComponent<ReproductionGene>();
 
         creature.ClearStatusText();
 
@@ -118,9 +129,12 @@ public class GeneManager : MonoBehaviour
 
 
         // ACTIONS
-        if (ageGene != null && ageGene.IsMating == true)
+        if (reproductionGene != null && reproductionGene.IsMating == true)
         {
-            ageGene.Mate();
+            if (creature.IsFemale == true)
+                reproductionGene.matingSession.ContinueSession();
+
+            // Male does not control session but is still locked into it
             return;
         }
 
@@ -136,9 +150,9 @@ public class GeneManager : MonoBehaviour
             return;
         }
 
-        if (ageGene != null && ageGene.NeedsToMate == true && ageGene.IsMating == false && ageGene.HasMate == true && GridCoord.AreAdjacent(creature.Position, ageGene.TargetMate.Position) == true)
+        if (reproductionGene != null && reproductionGene.NeedsToMate == true && reproductionGene.IsMating == false && reproductionGene.HasMate == true && GridCoord.AreAdjacent(creature.Position, reproductionGene.TargetMate.Position) == true)
         {
-            ageGene.StartMating();
+            reproductionGene.StartMating();
             return;
         }
 
@@ -154,8 +168,8 @@ public class GeneManager : MonoBehaviour
             else if (hungerGene != null && hungerGene.IsHungry == true && perceptionGene.Perception.IsFoodInSight == true)
                 hungerGene.SeekFood(perceptionGene);
 
-            else if (ageGene != null && ageGene.AlreadyMated == false && ageGene.NeedsToMate == true)
-                ageGene.SeekMate(perceptionGene);
+            else if (reproductionGene != null && reproductionGene.NeedsToMate == true)
+                reproductionGene.SeekMate(perceptionGene);
         }
 
 
@@ -168,17 +182,6 @@ public class GeneManager : MonoBehaviour
             else if (perceptionGene != null)
                 movementGene.Explore(perceptionGene);
         }
-    }
-
-    private Gene GetMostUrgentImpulse(Creature creature)
-    {
-        Gene mostUrgentImpulse = creature.Genome[0];
-
-        foreach (Gene gene in creature.Genome)
-            if (gene.UrgeLevel > mostUrgentImpulse.UrgeLevel)
-                mostUrgentImpulse = gene;
-
-        return mostUrgentImpulse;
     }
 
     private void EnsureSingleton()

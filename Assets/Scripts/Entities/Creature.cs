@@ -9,6 +9,9 @@ public class Creature : MonoBehaviour
     public Material maleMaterial;
     public TMPro.TextMeshPro statusTextMesh;
 
+    [Tooltip("Start and End scale values that the creature will lerp through as it becomes an adult.")]
+    public Vector2 scaleProgression = new Vector2(0.1f, 0.5f);
+
 
     [ReadOnly]
     [SerializeField]
@@ -32,10 +35,10 @@ public class Creature : MonoBehaviour
     public GridCoord Position { get { return _position; } set { _position = value; } }
 
 
-    private Gene[] genome;
-    public Gene[] Genome => genome;
-    public int GeneNumber { get { return genome.Length; } }
+    private Genome genome;
+    public Genome Genome => genome;
 
+    
     private Statistics statistics;
 
 
@@ -43,12 +46,13 @@ public class Creature : MonoBehaviour
 
     private void Awake()
     {
-        genome = GetComponents<Gene>();
+        genome = new Genome(this);
         statistics = GetComponent<Statistics>();
 
         _id = Creature.nextId;
         statistics.id = Id;
         Creature.nextId++;
+        GlobalStatistics.Instance.TotalMembers++;
 
         name = "Creature (" + Id + ")";
     }
@@ -90,13 +94,6 @@ public class Creature : MonoBehaviour
         statusTextMesh.text = "";
     }
 
-    public void Mutate(float chanceOfGeneMutation)
-    {
-        foreach (Gene gene in genome)
-            if (Random.value <= chanceOfGeneMutation)
-                gene.PointMutate();
-    }
-
     public void Die(CauseOfDeath causeOfDeath)
     {
         _isDying = true;
@@ -104,39 +101,45 @@ public class Creature : MonoBehaviour
         statistics.DeathCausedBy = causeOfDeath;
         SetStatusText("Dying of " + causeOfDeath.ToString());
         GlobalStatistics.Instance.RecordCreatureStatistics(statistics);
-        //Debug.Log("Died of: " + causeOfDeath.ToString());
+
+        ReproductionGene reproductionGene = GetComponent<ReproductionGene>();
+
+        if (reproductionGene != null && IsFemale == true && reproductionGene.IsPregnant == true)
+            GlobalStatistics.Instance.TotalDeathsDuringPregnancy++;
     }
 
-    public void InheritGenome(Gene[] inheritedGenome)
+    public void CompleteBirthProcess(Gene[] inheritedGenome, int startingAge, Statistics fatherStatistics, Statistics motherStatistics)
     {
-        for (int i = 0; i < genome.Length; i++)
+        AgeGene ageGene = GetComponent<AgeGene>();
+        HungerGene hungerGene = GetComponent<HungerGene>();
+        ThirstGene thirstGene = GetComponent<ThirstGene>();
+        Statistics statistics = GetComponent<Statistics>();
+
+        genome.InheritGenome(inheritedGenome);
+        genome.Mutate(0.2f);
+
+
+        // Offspring starts with a given age after gestation
+        if (ageGene != null)
+            ageGene.CurrentAge = startingAge;
+
+        if (hungerGene != null)
+            hungerGene.SetHungerAtRatio(0.5f);
+
+        if (thirstGene != null)
+            thirstGene.SetThirstAtRatio(0.5f);
+
+
+        if (statistics == null)
+            return;
+
+        if (motherStatistics != null)
         {
-            //Debug.Log("Inheriting " + inheritedGenome[i].ToString() + " in " + genome[i].ToString());
-            genome[i].Inherit(inheritedGenome[i]);
-        }
-    }
-
-    public (Gene[] left, Gene[] right) SpliceGenome(int numberOfLeftGenes)
-    {
-        int numberOfRightGenes = genome.Length - numberOfLeftGenes;
-        (Gene[] left, Gene[] right) splicedGenome = (new Gene[numberOfLeftGenes], new Gene[numberOfRightGenes]);
-
-        for (int i = 0; i < genome.Length; i++)
-        {
-            if (i < numberOfLeftGenes)
-                splicedGenome.left[i] = genome[i];
-
-            else
-            {
-                int current = i - splicedGenome.left.Length;
-                splicedGenome.right[current] = genome[i];
-            }
+            statistics.Generation = motherStatistics.Generation + 1;
+            motherStatistics.descendants.Add(statistics);
         }
 
-        /*Debug.Log("Genome length: " + genome.Length);
-        Debug.Log("Spliced Genome Length: " + (splicedGenome.left.Length + splicedGenome.right.Length));
-        Debug.Log("Left Elements: " + numberOfLeftGenes + " left length: " + splicedGenome.left.Length);
-        Debug.Log("Right Elements: " + numberOfRightGenes + " right length: " + splicedGenome.right.Length);*/
-        return splicedGenome;
+        statistics.parents.mother = motherStatistics;
+        statistics.parents.father = fatherStatistics;
     }
 }

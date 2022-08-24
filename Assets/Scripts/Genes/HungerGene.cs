@@ -61,9 +61,25 @@ public class HungerGene : Gene
             parent.Die(CauseOfDeath.Starvation);
     }
 
+    public void IncreaseHunger(float ratio)
+    {
+        _currentHunger -= Mathf.FloorToInt(MaxHunger * ratio);
+
+        if (HasStarved == true)
+            parent.Die(CauseOfDeath.Starvation);
+    }
+
+    public void SetHungerAtRatio(float ratio)
+    {
+        _currentHunger = Mathf.FloorToInt(MaxHunger * ratio);
+
+        if (HasStarved == true)
+            parent.Die(CauseOfDeath.Starvation);
+    }
+
     public override void Randomize()
     {
-        _maxHunger = Random.Range(15, 30);
+        _maxHunger = Random.Range(10, 30);
         _mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxHunger * 0.3f), Mathf.FloorToInt(_maxHunger * 0.5f));
     }
 
@@ -106,13 +122,22 @@ public class HungerGene : Gene
     public void SeekFood(PerceptionGene perceptionGene)
     {
         MovementGene movementGene = GetComponent<MovementGene>();
+        GridCoord foodTile;
+
+        if (perceptionGene.Perception.IsFoodInSight == false)
+            return;
+        
+        foodTile = perceptionGene.Perception.ClosestFreeFoodTile;
+
+        if (foodTile == null)
+            return;
 
         _isSeekingFood = true;
         parent.SetStatusText("Moving to Food");
 
         if (movementGene != null)
         {
-            List<GridCoord> pathToFood = AStar.GetShortestPath(parent.Position, perceptionGene.Perception.ClosestFoodTile);
+            List<GridCoord> pathToFood = AStar.GetShortestPath(parent.Position, foodTile);
             movementGene.SetMovePath(pathToFood);
         }
     }
