@@ -16,6 +16,5 @@ More details on the goals of the project can be found in my [midterm report](htt
 
 ## Next Steps
 
-* Tuning urge-driven behaviour to make sense. Currently once creatures reach maturity, they will barely ever stop breeding.
 * Creating more working graphs to display other statistics like average values of genes.
 * New carnivore species that prey on the herbivores to add a more active threat and means of population control.
