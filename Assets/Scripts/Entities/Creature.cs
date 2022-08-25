@@ -15,31 +15,36 @@ public class Creature : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
-    private int _id;
-    public int Id { get { return _id; } }
+    protected int _id;
+    public int Id => _id;
 
 
     [ReadOnly]
     [SerializeField]
-    private bool _isFemale;
-    public bool IsFemale { get { return _isFemale; } }
+    protected bool _isDying;
+    public bool IsDying => _isDying;
 
 
-    [ReadOnly]
-    [SerializeField]
-    private bool _isDying;
-    public bool IsDying { get { return _isDying; } }
-
-
-    private GridCoord _position;
+    protected GridCoord _position;
     public GridCoord Position { get { return _position; } set { _position = value; } }
 
 
-    private Genome genome;
+    protected Genome genome;
     public Genome Genome => genome;
 
     
     private Statistics statistics;
+
+    protected FoodType _foodTypeNeeded;
+    public FoodType FoodTypeNeeded => _foodTypeNeeded;
+
+
+    protected Species _species;
+    public Species Species => _species;
+
+
+    protected Sex.Types _sex;
+    public Sex.Types SexType => _sex;
 
 
     static private int nextId = 0;
@@ -62,20 +67,27 @@ public class Creature : MonoBehaviour
         GameManager.Instance.RemoveCreature(this);
     }
 
-    public void Initialize(GridCoord position)
+    public void Initialize(GridCoord position, Species species, FoodType foodTypeNeeded)
     {
         _position = position;
+        _species = species;
+        _foodTypeNeeded = foodTypeNeeded;
         transform.position = WorldPositions.GetTileCentre(Position);
 
-        _isFemale = Random.value < 0.5f;
-        statistics.isFemale = IsFemale;
 
-        if (IsFemale == true)
+        if (Random.value < 0.5f)
+        {
+            _sex = Sex.Types.Female;
             GetComponent<MeshRenderer>().sharedMaterial = femaleMaterial;
+        }
 
-        else GetComponent<MeshRenderer>().sharedMaterial = maleMaterial;
+        else
+        {
+            _sex = Sex.Types.Male;
+            GetComponent<MeshRenderer>().sharedMaterial = maleMaterial;
+        }
 
-        //Debug.Log("Creature created at " + position.ToString());
+        statistics.sex = _sex;
     }
 
     public void SetStatusText(string statusText)
@@ -104,7 +116,7 @@ public class Creature : MonoBehaviour
 
         ReproductionGene reproductionGene = GetComponent<ReproductionGene>();
 
-        if (reproductionGene != null && IsFemale == true && reproductionGene.IsPregnant == true)
+        if (reproductionGene != null && SexType == Sex.Types.Female && reproductionGene.IsPregnant == true)
             GlobalStatistics.Instance.TotalDeathsDuringPregnancy++;
     }
 

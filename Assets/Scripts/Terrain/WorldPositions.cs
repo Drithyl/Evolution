@@ -5,35 +5,42 @@ using System;
 
 public class WorldPositions
 {
-    static private Vector3[,] tileCentres;
+    //static private Vector3[,] tileCentres;
+    static private WorldTile[,] worldTiles;
     static private Dictionary<Creature, GridCoord> creaturePositions;
     static private Dictionary<Food, GridCoord> foodPositions;
 
     static public void Initialize()
     {
-        tileCentres = new Vector3[WorldTerrain.Width, WorldTerrain.Height];
+        //tileCentres = new Vector3[WorldTerrain.Width, WorldTerrain.Height];
+        worldTiles = new WorldTile[WorldTerrain.Width, WorldTerrain.Height];
         creaturePositions = new Dictionary<Creature, GridCoord>();
         foodPositions = new Dictionary<Food, GridCoord>();
     }
 
-    static public void SetTileCentre(GridCoord coord, Vector3 centre)
+    static public void InitializeTile(int x, int y, Vector3 centre)
     {
-        SetTileCentre(coord.X, coord.Y, centre);
+        worldTiles[x, y] = new WorldTile(new GridCoord(x, y), centre);
     }
 
-    static public void SetTileCentre(int x, int y, Vector3 centre)
+    static public void SetTileAsShore(int x, int y)
     {
-        tileCentres[x, y] = centre;
+        worldTiles[x, y].isShore = true;
+    }
+
+    static public void SetTileAsLand(int x, int y)
+    {
+        worldTiles[x, y].isLand = true;
     }
 
     static public Vector3 GetTileCentre(GridCoord coord)
     {
-        return tileCentres[coord.X, coord.Y];
+        return GetTileCentre(coord.X, coord.Y);
     }
 
     static public Vector3 GetTileCentre(int x, int y)
     {
-        return tileCentres[x, y];
+        return worldTiles[x, y].tileCentre;
     }
 
     static public void SetCreaturePosition(Creature creature, int x, int y)
@@ -43,14 +50,12 @@ public class WorldPositions
 
     static public void SetCreaturePosition(Creature creature, GridCoord tile)
     {
-        RemoveCreaturePosition(creature);
-        creaturePositions.Add(creature, tile);
+        worldTiles[tile.X, tile.Y].creatureOnTile = creature;
     }
 
-    static public void RemoveCreaturePosition(Creature creature)
+    static public void RemoveCreatureFromPosition(Creature creature, GridCoord tile)
     {
-        if (creaturePositions.ContainsKey(creature) == true)
-            creaturePositions.Remove(creature);
+        worldTiles[tile.X, tile.Y].creatureOnTile = null;
     }
 
     static public bool HasCreatureAt(int x, int y)
@@ -60,7 +65,7 @@ public class WorldPositions
 
     static public bool HasCreatureAt(GridCoord tile)
     {
-        return creaturePositions.ContainsValue(tile);
+        return worldTiles[tile.X, tile.Y].creatureOnTile != null;
     }
 
     static public Creature GetCreatureAt(int x, int y)
@@ -70,11 +75,7 @@ public class WorldPositions
 
     static public Creature GetCreatureAt(GridCoord tile)
     {
-        foreach (KeyValuePair<Creature, GridCoord> pair in creaturePositions)
-            if (pair.Value == tile)
-                return pair.Key;
-
-        return null;
+        return worldTiles[tile.X, tile.Y].creatureOnTile;
     }
 
     static public void SetFoodPosition(Food food, int x, int y)
@@ -84,38 +85,32 @@ public class WorldPositions
 
     static public void SetFoodPosition(Food food, GridCoord tile)
     {
-        RemoveFoodPosition(food);
-        foodPositions.Add(food, tile);
+        worldTiles[tile.X, tile.Y].foodsOnTile.Add(food);
     }
 
-    static public void RemoveFoodPosition(Food food)
+    static public void RemoveFoodFromPosition(Food food, GridCoord tile)
     {
-        if (foodPositions.ContainsKey(food) == true)
-            foodPositions.Remove(food);
+        worldTiles[tile.X, tile.Y].foodsOnTile.Remove(food);
     }
 
-    static public bool HasFoodAt(int x, int y)
+    static public bool HasFoodAt(int x, int y, FoodType foodType)
     {
-        return HasFoodAt(new GridCoord(x, y));
+        return HasFoodAt(new GridCoord(x, y), foodType);
     }
 
-    static public bool HasFoodAt(GridCoord tile)
+    static public bool HasFoodAt(GridCoord tile, FoodType foodType)
     {
-        return foodPositions.ContainsValue(tile);
+        return worldTiles[tile.X, tile.Y].foodsOnTile.Find(x => x.FoodType == foodType) != null;
     }
 
-    static public Food GetFoodAt(int x, int y)
+    static public Food GetFoodAt(int x, int y, FoodType foodType)
     {
-        return GetFoodAt(new GridCoord(x, y));
+        return GetFoodAt(new GridCoord(x, y), foodType);
     }
 
-    static public Food GetFoodAt(GridCoord tile)
+    static public Food GetFoodAt(GridCoord tile, FoodType foodType)
     {
-        foreach (KeyValuePair<Food, GridCoord> pair in foodPositions)
-            if (pair.Value == tile)
-                return pair.Key;
-
-        return null;
+        return worldTiles[tile.X, tile.Y].foodsOnTile.Find(x => x.FoodType == foodType);
     }
 
     // Vertices are returned so that the first one in the list will
@@ -262,119 +257,283 @@ public class WorldPositions
 
     static public List<GridCoord> GetTilesWithinDistance(GridCoord coord, int radius, bool includeCentre = true)
     {
-        List<GridCoord> tiles = new List<GridCoord>();
-        int startX = coord.X - radius;
-        int startY = coord.Y - radius;
-        int endX = coord.X + radius;
-        int endY = coord.Y + radius;
+        IEnumerable<WorldTile> circlePattern = EnumerablePatterns.CircleFrom(worldTiles, coord.X, coord.Y, radius);
+        List<GridCoord> coords = new List<GridCoord>();
 
-        // Optimization to use with GridSqrDistance(), which uses the squared distance
-        float distance = radius * radius;
+        foreach (WorldTile tile in circlePattern)
+            if (includeCentre == true || coord != tile.gridPosition)
+                coords.Add(tile.gridPosition);
 
-        for (int x = startX; x <= endX; x++)
-        {
-            for (int y = startY; y <= endY; y++)
-            {
-                GridCoord tile = new GridCoord(x, y);
-
-                if (WorldTerrain.IsOutOfBounds(tile) == true)
-                    continue;
-
-                if (tile == coord && includeCentre == false)
-                    continue;
-
-                if (GridCoord.GridSqrDistance(coord, tile) <= distance)
-                    tiles.Add(tile);
-            }
-        }
-
-        return tiles;
+        return coords;
     }
 
     static public List<GridCoord> GetTilesWithinManhattanDistance(GridCoord coord, int radius, bool includeCentre = true)
     {
-        List<GridCoord> tiles = new List<GridCoord>();
-        int startX = coord.X - radius;
-        int startY = coord.Y - radius;
-        int endX = coord.X + radius;
-        int endY = coord.Y + radius;
+        IEnumerable<WorldTile> circlePattern = EnumerablePatterns.ManhattanCircleFrom(worldTiles, coord.X, coord.Y, radius);
+        List<GridCoord> coords = new List<GridCoord>();
 
-        for (int x = startX; x <= endX; x++)
-        {
-            for (int y = startY; y <= endY; y++)
-            {
-                GridCoord tile = new GridCoord(x, y);
+        foreach (WorldTile tile in circlePattern)
+            if (includeCentre == true || coord != tile.gridPosition)
+                coords.Add(tile.gridPosition);
 
-                if (WorldTerrain.IsOutOfBounds(tile) == true)
-                    continue;
-
-                if (tile == coord && includeCentre == false)
-                    continue;
-
-                if (GridCoord.GridManhattanDistance(coord, tile) <= radius)
-                    tiles.Add(tile);
-            }
-        }
-
-        return tiles;
+        return coords;
     }
 
     static public List<GridCoord> GetLandWithinDistance(GridCoord coord, int radius, bool includeCentre = true)
     {
-        List<GridCoord> tiles = new List<GridCoord>();
-        int startX = coord.X - radius;
-        int startY = coord.Y - radius;
-        int endX = coord.X + radius;
-        int endY = coord.Y + radius;
+        IEnumerable<WorldTile> circlePattern = EnumerablePatterns.CircleFrom(worldTiles, coord.X, coord.Y, radius);
+        List<GridCoord> landCoords = new List<GridCoord>();
 
-        // Optimization to use with GridSqrDistance(), which uses the squared distance
+        foreach (WorldTile tile in circlePattern)
+            if (includeCentre == true || coord != tile.gridPosition)
+                if (tile.isLand)
+                    landCoords.Add(tile.gridPosition);
+
+        return landCoords;
+    }
+
+    static public List<GridCoord> LandWithinManhattanDistance(GridCoord coord, int radius, bool includeCentre = true)
+    {
+        IEnumerable<WorldTile> circlePattern = EnumerablePatterns.ManhattanCircleFrom(worldTiles, coord.X, coord.Y, radius);
+        List<GridCoord> landCoords = new List<GridCoord>();
+
+        foreach (WorldTile tile in circlePattern)
+            if (includeCentre == true || coord != tile.gridPosition)
+                if (tile.isLand)
+                    landCoords.Add(tile.gridPosition);
+
+        return landCoords;
+    }
+
+
+
+    static public GridCoord RandomLandTileInRadius(int cX, int cY, int radius)
+    {
+        IEnumerable<WorldTile> circlePattern = EnumerablePatterns.CircleFrom(worldTiles, cX, cY, radius);
+        List<GridCoord> landCoords = new List<GridCoord>();
+
+        foreach (WorldTile tile in circlePattern)
+            if (tile.isLand)
+                landCoords.Add(tile.gridPosition);
+
+        return landCoords[UnityEngine.Random.Range(0, landCoords.Count)];
+    }
+
+    static public GridCoord RandomLandTileInRadius(GridCoord centre, int radius)
+    {
+        return RandomLandTileInRadius(centre.X, centre.Y, radius);
+    }
+
+
+
+    static public GridCoord RandomEmptyLandTileInRadius(int x, int y, int radius)
+    {
+        IEnumerable<WorldTile> circlePattern = EnumerablePatterns.CircleFrom(worldTiles, x, y, radius);
+        List<GridCoord> landCoords = new List<GridCoord>();
+
+        foreach (WorldTile tile in circlePattern)
+            if (tile.isLand && WorldPositions.HasCreatureAt(tile.gridPosition) == false)
+                landCoords.Add(tile.gridPosition);
+
+        return landCoords[UnityEngine.Random.Range(0, landCoords.Count)];
+    }
+
+    static public GridCoord RandomEmptyLandTileInRadius(GridCoord centre, int radius)
+    {
+        return RandomEmptyLandTileInRadius(centre.X, centre.Y, radius);
+    }
+
+
+
+    static public Creature ClosestCreatureInRadius(int x, int y, int radius, Species species = Species.Any, Sex.Types sex = Sex.Types.Any)
+    {
+        IEnumerable<WorldTile> spiralPattern =
+            EnumerablePatterns.SpiralFromWithRadius(
+                worldTiles, new Vector2Int(x, y), radius
+            );
+
+        foreach (WorldTile tile in spiralPattern)
+        {
+            if (tile.creatureOnTile == null)
+                continue;
+
+            if (tile.creatureOnTile.Species != species || species != Species.Any)
+                continue;
+
+            if (tile.creatureOnTile.SexType != sex || sex != Sex.Types.Any)
+                continue;
+
+            return tile.creatureOnTile;
+        }
+
+        return null;
+    }
+
+    static public Creature ClosestCreatureInRadius(GridCoord coord, int radius, Species species, Sex.Types sex)
+    {
+        return ClosestCreatureInRadius(coord.X, coord.Y, radius, species, sex);
+    }
+
+
+
+    static public Food ClosestFoodInRadius(int x, int y, int radius, FoodType foodType)
+    {
+        IEnumerable<WorldTile> spiralPattern =
+            EnumerablePatterns.SpiralFromWithRadius(
+                worldTiles, new Vector2Int(x, y), radius
+            );
+
+        foreach (WorldTile tile in spiralPattern)
+        {
+            if (tile.foodsOnTile.Count <= 0)
+                continue;
+
+            Food foodOnTile = tile.foodsOnTile.Find(x => x.FoodType == foodType);
+
+            if (foodOnTile == null)
+                continue;
+
+            return foodOnTile;
+        }
+
+        return null;
+    }
+
+    static public Food ClosestFoodInRadius(GridCoord coord, int radius, FoodType foodType)
+    {
+        return ClosestFoodInRadius(coord.X, coord.Y, radius, foodType);
+    }
+
+
+
+    static public Food ClosestFreeFoodInRadius(int x, int y, int radius, FoodType foodType)
+    {
+        IEnumerable<WorldTile> spiralPattern =
+            EnumerablePatterns.SpiralFromWithRadius(
+                worldTiles, new Vector2Int(x, y), radius
+            );
+
+        foreach (WorldTile tile in spiralPattern)
+        {
+            if (tile.foodsOnTile.Count <= 0)
+                continue;
+
+            Food foodOnTile = tile.foodsOnTile.Find(x => x.FoodType == foodType);
+
+            if (foodOnTile == null)
+                continue;
+
+            if (HasCreatureAt(tile.gridPosition) == true)
+                continue;
+
+            return foodOnTile;
+        }
+
+        return null;
+    }
+
+    static public Food ClosestFreeFoodInRadius(GridCoord coord, int radius, FoodType foodType)
+    {
+        return ClosestFreeFoodInRadius(coord.X, coord.Y, radius, foodType);
+    }
+
+
+
+    static public GridCoord ClosestShoreInRadius(int x, int y, int radius)
+    {
+        IEnumerable<WorldTile> spiralPattern =
+            EnumerablePatterns.SpiralFromWithRadius(
+                worldTiles, new Vector2Int(x, y), radius
+            );
+
+        foreach (WorldTile tile in spiralPattern)
+        {
+            if (tile.isShore == false)
+                continue;
+
+            return tile.gridPosition;
+        }
+
+        // GridCoord is not nullable since it's a struct
+        // Instead return an out of bounds coord and hope
+        // that the calling function checks this return
+        return new GridCoord(-1, -1);
+    }
+
+    static public GridCoord ClosestShoreInRadius(GridCoord coord, int radius)
+    {
+        return ClosestShoreInRadius(coord.X, coord.Y, radius);
+    }
+
+
+
+    static public GridCoord ClosestEmptyShoreInRadius(int x, int y, int radius)
+    {
+        IEnumerable<WorldTile> spiralPattern =
+            EnumerablePatterns.SpiralFromWithRadius(
+                worldTiles, new Vector2Int(x, y), radius
+            );
+
+        foreach (WorldTile tile in spiralPattern)
+        {
+            if (tile.isShore == false)
+                continue;
+
+            if (HasCreatureAt(tile.gridPosition) == true)
+                continue;
+
+            return tile.gridPosition;
+        }
+
+        // GridCoord is not nullable since it's a struct
+        // Instead return an out of bounds coord and hope
+        // that the calling function checks this return
+        return new GridCoord(-1, -1);
+    }
+
+    static public GridCoord ClosestEmptyShoreInRadius(GridCoord coord, int radius)
+    {
+        return ClosestEmptyShoreInRadius(coord.X, coord.Y, radius);
+    }
+
+
+
+    static public void SpiralSpeedTest(int x, int y, int radius)
+    {
+        IEnumerable<WorldTile> spiralPattern =
+            EnumerablePatterns.SpiralFromWithRadius(
+                worldTiles, new Vector2Int(x, y), radius
+            );
+        float distance = radius * radius;
+
+        foreach (WorldTile tile in spiralPattern)
+        {
+            if (GridCoord.GridSqrDistance(tile.gridPosition, new GridCoord(x, y)) <= distance)
+            {
+
+            }
+        }
+    }
+
+
+    static public void SquareSpeedTest(int cX, int cY, int radius)
+    {
+        int startX = cX - radius;
+        int startY = cY - radius;
+        int endX = cX + radius;
+        int endY = cY + radius;
+
         float distance = radius * radius;
 
         for (int x = startX; x <= endX; x++)
         {
             for (int y = startY; y <= endY; y++)
             {
-                GridCoord tile = new GridCoord(x, y);
+                if (GridCoord.GridSqrDistance(new GridCoord(x, y), new GridCoord(cX, cY)) <= distance)
+                {
 
-                if (WorldTerrain.IsOutOfBounds(tile) == true || WorldTerrain.IsLand(tile) == false)
-                    continue;
-
-                if (tile == coord && includeCentre == false)
-                    continue;
-
-                if (GridCoord.GridSqrDistance(coord, tile) <= distance)
-                    tiles.Add(tile);
+                }
             }
         }
-
-        return tiles;
-    }
-
-    static public List<GridCoord> GetLandWithinManhattanDistance(GridCoord coord, int radius, bool includeCentre = true)
-    {
-        List<GridCoord> tiles = new List<GridCoord>();
-        int startX = coord.X - radius;
-        int startY = coord.Y - radius;
-        int endX = coord.X + radius;
-        int endY = coord.Y + radius;
-
-        for (int x = startX; x <= endX; x++)
-        {
-            for (int y = startY; y <= endY; y++)
-            {
-                GridCoord tile = new GridCoord(x, y);
-
-                if (WorldTerrain.IsOutOfBounds(tile) == true || WorldTerrain.IsLand(tile) == false)
-                    continue;
-
-                if (tile == coord && includeCentre == false)
-                    continue;
-
-                if (GridCoord.GridManhattanDistance(coord, tile) <= radius)
-                    tiles.Add(tile);
-            }
-        }
-
-        return tiles;
     }
 }

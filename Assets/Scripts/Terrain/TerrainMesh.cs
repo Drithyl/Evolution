@@ -197,7 +197,8 @@ public class TerrainMesh
         // Determine the exact centre of the tile, as this will be useful further down
         // the line for movement and creature spawning, as well as other things
         Vector3 tileCentre = new Vector3(nw.x + TerrainConstants.TILE_HALF_SIZE, nw.y, nw.z - TerrainConstants.TILE_HALF_SIZE);
-        WorldPositions.SetTileCentre(tileCoord.X, tileCoord.Y, tileCentre);
+        WorldPositions.InitializeTile(tileCoord.X, tileCoord.Y, tileCentre);
+        WorldPositions.SetTileAsLand(tileCoord.X, tileCoord.Y);
 
         Vector3[] tileVertices = { nw, ne, sw, se };
 

@@ -52,7 +52,7 @@ public class ReproductionGene : Gene
     { 
         get 
         {
-            if (parent.IsFemale == false)
+            if (parent.SexType == Sex.Types.Female)
                 return false;
 
             return _isPregnant; 
@@ -61,12 +61,6 @@ public class ReproductionGene : Gene
 
 
     public bool IsMating { get { return matingSession != null; } }
-
-
-    /*[SerializeField]
-    private bool _alreadyMated;
-    public bool AlreadyMated { get { return _alreadyMated; } set { _alreadyMated = value; } }
-    */
 
     private Creature _targetMate;
     public Creature TargetMate { get { return _targetMate; } }
@@ -81,7 +75,7 @@ public class ReproductionGene : Gene
     { 
         get 
         { 
-            return /*AlreadyMated == false &&*/ ageGene.IsMature == true && IsMating == false; 
+            return ageGene.IsMature == true && IsMating == false; 
         } 
     }
 
@@ -163,7 +157,7 @@ public class ReproductionGene : Gene
 
     public bool IsSuitableMatingPartner(Creature suitor)
     {
-        if (parent.IsFemale == suitor.IsFemale)
+        if (parent.SexType == suitor.SexType)
         {
             //Debug.Log("Same sex!");
             return false;
@@ -198,15 +192,15 @@ public class ReproductionGene : Gene
 
     public void SeekMate(PerceptionGene perceptionGene)
     {
-        Creature closestMate = (parent.IsFemale == true) ?
-            perceptionGene.Perception.ClosestMale :
-            perceptionGene.Perception.ClosestFemale;
+        Creature closestMate = WorldPositions.ClosestCreatureInRadius(
+            parent.Position,
+            perceptionGene.DistanceInt,
+            parent.Species,
+            Sex.OppositeSex(parent.SexType)
+        );
 
         if (closestMate == null)
             return;
-
-        /*if (AlreadyMated == true)
-            return;*/
 
 
         ReproductionGene mateReproductionGene = closestMate.GetComponent<ReproductionGene>();
@@ -243,34 +237,6 @@ public class ReproductionGene : Gene
         mateReproductionGene.matingSession = matingSession;
     }
 
-    /*public void Mate()
-    {
-        // If partner is lost for whatever reason, cancel mating
-        if (HasMate == false)
-        {
-            _isMating = false;
-            return;
-        }
-
-        parent.SetStatusText("Mating");
-
-        if (movementGene != null)
-            movementGene.ClearMovePath();
-
-        // Female controls timer of mating process
-        if (parent.IsFemale == false)
-            return;
-
-        if (GameManager.Instance.IsNewTurn == true)
-            _matingProgress++;
-
-        if (MatingProgress < TurnsToCompleteMating)
-            return;
-
-        FinishMating(parent);
-        FinishMating(TargetMate);
-    }*/
-
     public void ReduceMatingUrge()
     {
         float reduceBy = MatingUrge * 0.2f;
@@ -288,26 +254,6 @@ public class ReproductionGene : Gene
         _targetMateStatistics = father.GetComponent<Statistics>();
         _offspringLeftToSpawn = Random.Range(1, MaxOffspring + 1);
     }
-
-    /*public static void FinishMating(Creature creature)
-    {
-        ReproductionGene reproductionGene = creature.GetComponent<ReproductionGene>();
-
-        reproductionGene.MatingProgress = 0;
-        creature.SetStatusText("Finishing Mating");
-
-        reproductionGene.IsMating = false;
-        //reproductionGene.AlreadyMated = true;
-
-        reproductionGene.CurrentMatingUrge = Mathf.Clamp01(reproductionGene.CurrentMatingUrge - (reproductionGene.MatingUrge * 0.1f));
-
-        if (creature.IsFemale == false)
-            return;
-
-        reproductionGene.IsPregnant = true;
-        reproductionGene.StoreGenesFromParent();
-        
-    }*/
 
     public void ContinuePregnancy()
     {
@@ -346,7 +292,7 @@ public class ReproductionGene : Gene
         maternalGenome.right.CopyTo(inheritedGenome, paternalGenome.left.Length);
         //Debug.Log("Inherited genome: " + inheritedGenome.Length);
 
-        Creature offspring = CreatureSpawner.Instance.Spawn(Species.Animal, parent.Position);
+        Creature offspring = CreatureSpawner.Instance.Spawn(parent.Species, parent.Position);
         offspring.CompleteBirthProcess(inheritedGenome, MonthsOfPregnancy, _targetMateStatistics, statistics);
 
         if (TargetMate == null)

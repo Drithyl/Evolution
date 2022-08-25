@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class FoodSpawner : MonoBehaviour
+public class PlantSpawner : MonoBehaviour
 {
-    static public FoodSpawner Instance { get; private set; }
+    static public PlantSpawner Instance { get; private set; }
 
     public GameObject foodPrefab;
 
@@ -29,17 +29,16 @@ public class FoodSpawner : MonoBehaviour
         else Instance = this;
     }
 
-    public void ClearFood()
+    public void ClearPlants()
     {
-        Transform[] existingFood = transform.GetComponentsInChildren<Transform>();
+        PlantFood[] existingPlants = transform.GetComponentsInChildren<PlantFood>();
 
         // Delete existing food
-        foreach (Transform child in existingFood)
-            if (child != transform && child != null && child.gameObject != null)
-                DestroyImmediate(child.gameObject);
+        foreach (PlantFood plant in existingPlants)
+            DestroyImmediate(plant.gameObject);
     }
 
-    public void SpawnFood(float foodChancePerTile)
+    public void SpawnPlant(float foodChancePerTile)
     {
         for (int x = 0; x < WorldTerrain.Width; x++)
         {
@@ -48,20 +47,20 @@ public class FoodSpawner : MonoBehaviour
                 if (WorldTerrain.IsLand(x, y) == false)
                     continue;
 
-                if (WorldPositions.HasFoodAt(x, y) == true)
+                if (WorldPositions.HasFoodAt(x, y, FoodType.Plant) == true)
                     continue;
 
                 if (Random.value > foodChancePerTile)
                     continue;
 
-                GameObject food = Instantiate(foodPrefab, transform);
-                Food foodScript = food.GetComponent<Food>();
+                GameObject plant = Instantiate(foodPrefab, transform);
+                PlantFood foodScript = plant.GetComponent<PlantFood>();
                 foodScript.Initialize(new GridCoord(x, y));
             }
         }
     }
 
-    public void SpawnFood(float foodChancePerTile, int startingAmount)
+    public void SpawnPlant(float foodChancePerTile, int startingAmount)
     {
         for (int x = 0; x < WorldTerrain.Width; x++)
         {
@@ -70,14 +69,14 @@ public class FoodSpawner : MonoBehaviour
                 if (WorldTerrain.IsLand(x, y) == false)
                     continue;
 
-                if (WorldPositions.HasFoodAt(x, y) == true)
+                if (WorldPositions.HasFoodAt(x, y, FoodType.Plant) == true)
                     continue;
 
                 if (Random.value > foodChancePerTile)
                     continue;
 
-                GameObject food = Instantiate(foodPrefab, transform);
-                Food foodScript = food.GetComponent<Food>();
+                GameObject plant = Instantiate(foodPrefab, transform);
+                PlantFood foodScript = plant.GetComponent<PlantFood>();
                 foodScript.Initialize(new GridCoord(x, y), startingAmount);
             }
         }

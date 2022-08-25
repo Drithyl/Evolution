@@ -12,6 +12,7 @@ public class MovementGene : Gene
     private float _secondsToCompleteMove;
     public float SecondsToCompleteMove { get { return _secondsToCompleteMove; } }
 
+
     [SerializeField]
     private float moveProgress;
 
@@ -86,9 +87,13 @@ public class MovementGene : Gene
 
     public void Explore(PerceptionGene perceptionGene)
     {
-        GridCoord randomTile = perceptionGene.Perception.RandomEmptyLandTile;
-        List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile);
+        GridCoord randomTile = WorldPositions.RandomEmptyLandTileInRadius(
+            parent.Position,
+            perceptionGene.DistanceInt
+        );
 
+        List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile);
+        
         if (path == null)
         {
             Debug.Log("Invalid path found to explore; ignoring");

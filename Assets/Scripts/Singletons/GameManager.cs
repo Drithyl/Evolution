@@ -64,7 +64,7 @@ public class GameManager : MonoBehaviour
     public int NumberOfCreatures { get { return creatures.Count; } }
 
 
-    private List<Food> foodSupply = new List<Food>();
+    private List<PlantFood> foodSupply = new List<PlantFood>();
     public int NumberOfFood { get { return foodSupply.Count; } }
 
 
@@ -84,6 +84,13 @@ public class GameManager : MonoBehaviour
     {
         TerrainGenerator.Instance.Initialize();
 
+        /*float startTime = Time.realtimeSinceStartup;
+        WorldPositions.SpiralSpeedTest(Mathf.FloorToInt(WorldTerrain.Width * 0.5f), Mathf.FloorToInt(WorldTerrain.Height), Mathf.FloorToInt(WorldTerrain.Width * 0.2f));
+        Debug.Log("Spiral time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");
+
+        startTime = Time.realtimeSinceStartup;
+        WorldPositions.SquareSpeedTest(Mathf.FloorToInt(WorldTerrain.Width * 0.5f), Mathf.FloorToInt(WorldTerrain.Height), Mathf.FloorToInt(WorldTerrain.Width * 0.2f));
+        Debug.Log("Square time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");*/
 
         for (int i = 0; i < numOfStartingCreatures; i++)
         {
@@ -167,7 +174,7 @@ public class GameManager : MonoBehaviour
 
     private void GrowFood()
     {
-        foreach (Food food in foodSupply)
+        foreach (PlantFood food in foodSupply)
         {
             if (food.ReachedFullGrowth == true)
                 food.Add(foodDecayPerMonth);
@@ -178,7 +185,7 @@ public class GameManager : MonoBehaviour
 
     private void SpreadFood(float chance)
     {
-        FoodSpawner.Instance.SpawnFood(chance, startFoodOnNewGrowth);
+        PlantSpawner.Instance.SpawnPlant(chance, startFoodOnNewGrowth);
     }
 
     private void UpdateCreatureList()
@@ -192,7 +199,7 @@ public class GameManager : MonoBehaviour
         foreach (Creature creature in creaturesRemoveQueue)
         {
             creatures.Remove(creature);
-            WorldPositions.RemoveCreaturePosition(creature);
+            WorldPositions.RemoveCreatureFromPosition(creature, creature.Position);
         }
 
         creaturesAddQueue.Clear();
@@ -208,19 +215,19 @@ public class GameManager : MonoBehaviour
     {
         //creaturesRemoveQueue.Remove(creature);
         creatures.Remove(creature);
-        WorldPositions.RemoveCreaturePosition(creature);
+        WorldPositions.RemoveCreatureFromPosition(creature, creature.Position);
     }
 
-    public void AddFoodToSupply(Food food)
+    public void AddPlantFoodToSupply(PlantFood food)
     {
         foodSupply.Add(food);
         WorldPositions.SetFoodPosition(food, food.Position);
     }
 
-    public void RemoveFoodFromSupply(Food food)
+    public void RemoveFoodFromSupply(PlantFood food)
     {
         foodSupply.Remove(food);
-        WorldPositions.RemoveFoodPosition(food);
+        WorldPositions.RemoveFoodFromPosition(food, food.Position);
     }
 
     private void EnsureSingleton()

@@ -53,6 +53,11 @@ public class HungerGene : Gene
         _isHungry = CurrentHunger <= MaxHunger * 0.5f;
     }
 
+    public int GetNutritionalValue()
+    {
+        return CurrentHunger;
+    }
+
     public void IncreaseHunger()
     {
         _currentHunger--;
@@ -105,7 +110,7 @@ public class HungerGene : Gene
 
     public void Eat()
     {
-        Food food = WorldPositions.GetFoodAt(parent.Position);
+        Food food = WorldPositions.GetFoodAt(parent.Position, parent.FoodTypeNeeded);
 
         int missingNutrition = _maxHunger - _currentHunger;
         int nutritionMouthful = Mathf.FloorToInt(MouthfulNutrition);
@@ -122,14 +127,13 @@ public class HungerGene : Gene
     public void SeekFood(PerceptionGene perceptionGene)
     {
         MovementGene movementGene = GetComponent<MovementGene>();
-        GridCoord foodTile;
+        Food food = WorldPositions.ClosestFreeFoodInRadius(
+            parent.Position, 
+            perceptionGene.DistanceInt,
+            parent.FoodTypeNeeded
+        );
 
-        if (perceptionGene.Perception.IsFoodInSight == false)
-            return;
-        
-        foodTile = perceptionGene.Perception.ClosestFreeFoodTile;
-
-        if (foodTile == null)
+        if (food == null)
             return;
 
         _isSeekingFood = true;
@@ -137,7 +141,7 @@ public class HungerGene : Gene
 
         if (movementGene != null)
         {
-            List<GridCoord> pathToFood = AStar.GetShortestPath(parent.Position, foodTile);
+            List<GridCoord> pathToFood = AStar.GetShortestPath(parent.Position, food.Position);
             movementGene.SetMovePath(pathToFood);
         }
     }

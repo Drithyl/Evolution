@@ -8,7 +8,7 @@ public class Statistics : MonoBehaviour
     public int id;
 
     [ReadOnly]
-    public bool isFemale = false;
+    public Sex.Types sex;
 
     [ReadOnly]
     [SerializeField]

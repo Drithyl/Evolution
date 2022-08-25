@@ -6,5 +6,6 @@ public enum CauseOfDeath
 {
     OldAge,
     Thirst,
-    Starvation
+    Starvation,
+    Devoured
 }

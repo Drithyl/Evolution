@@ -117,14 +117,13 @@ public class ThirstGene : Gene
     public void SeekWater(PerceptionGene perceptionGene)
     {
         MovementGene movementGene = GetComponent<MovementGene>();
-        GridCoord shoreTile;
+        GridCoord shoreTile = WorldPositions.ClosestEmptyShoreInRadius(
+            parent.Position,
+            perceptionGene.DistanceInt
+        );
 
-        if (perceptionGene.Perception.IsShoreTileInSight == false)
-            return;
-
-        shoreTile = perceptionGene.Perception.ClosestFreeShoreTile;
-
-        if (shoreTile == null)
+        // If no shore tile is found it will return a -1, -1 GridCoord
+        if (WorldTerrain.IsOutOfBounds(shoreTile) == true)
             return;
 
         _isSeekingWater = true;
@@ -132,7 +131,7 @@ public class ThirstGene : Gene
 
         if (movementGene != null)
         {
-            List<GridCoord> pathToWater = AStar.GetShortestPath(parent.Position, perceptionGene.Perception.ClosestShoreTile);
+            List<GridCoord> pathToWater = AStar.GetShortestPath(parent.Position, shoreTile);
             movementGene.SetMovePath(pathToWater);
         }
     }

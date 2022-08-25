@@ -35,7 +35,7 @@ public class PerceptionField
         {
             foreach (var pair in creatures)
                 foreach (Creature creature in pair.Value)
-                    if (creature.IsFemale == true)
+                    if (creature.SexType == Sex.Types.Female)
                         return true;
 
             return false;
@@ -48,7 +48,7 @@ public class PerceptionField
         {
             foreach (var pair in creatures)
                 foreach (Creature creature in pair.Value)
-                    if (creature.IsFemale == false)
+                    if (creature.SexType == Sex.Types.Male)
                         return true;
 
             return false;
@@ -110,7 +110,7 @@ public class PerceptionField
         {
             foreach (var pair in creatures)
                 foreach (Creature creature in pair.Value)
-                    if (creature.IsFemale == true)
+                    if (creature.SexType == Sex.Types.Female)
                         return creature;
 
             return null;
@@ -123,7 +123,7 @@ public class PerceptionField
         {
             foreach (var pair in creatures)
                 foreach (Creature creature in pair.Value)
-                    if (creature.IsFemale == false)
+                    if (creature.SexType == Sex.Types.Male)
                         return creature;
 
             return null;
@@ -205,8 +205,8 @@ public class PerceptionField
             if (WorldTerrain.IsTileShore(tile) == true)
                 AddToSortedListOfLists(shoreTiles, dist, tile);
 
-            if (WorldPositions.HasFoodAt(tile) == true)
-                AddToSortedListOfLists(foodTiles, dist, tile);
+            /*if (WorldPositions.HasFoodAt(tile) == true)
+                AddToSortedListOfLists(foodTiles, dist, tile);*/
 
             if (WorldPositions.HasCreatureAt(tile) == false)
                 continue;

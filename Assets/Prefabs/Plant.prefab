@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 5601584851084193306}
   - component: {fileID: 3921761873076892200}
   - component: {fileID: 99420010156502576}
-  - component: {fileID: 2729529673861603360}
+  - component: {fileID: 2797935785133697797}
   m_Layer: 0
-  m_Name: Food
+  m_Name: Plant
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -84,7 +84,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2729529673861603360
+--- !u!114 &2797935785133697797
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,7 +93,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1084421854511209098}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25d537bdf6d42af4ebf16dc83f51b1ef, type: 3}
+  m_Script: {fileID: 11500000, guid: 6d1187d537f48444a892abd6a5ccbf57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   scaleMultiplier: 0.015

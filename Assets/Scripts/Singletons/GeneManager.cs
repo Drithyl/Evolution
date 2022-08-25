@@ -33,7 +33,7 @@ public class GeneManager : MonoBehaviour
             return;
 
         // PREGNANCY CONTINUES EVERY TURN REGARDLESS OF ACTIONS
-        if (reproductionGene != null && creature.IsFemale == true && reproductionGene.IsPregnant == true)
+        if (reproductionGene != null && creature.SexType == Sex.Types.Female && reproductionGene.IsPregnant == true)
             reproductionGene.ContinuePregnancy();
 
         if (movementGene != null && movementGene.IsMoving == true)
@@ -43,7 +43,7 @@ public class GeneManager : MonoBehaviour
         // ONGOING ACTIONS THAT MAY CONTINUE
         if (reproductionGene != null && reproductionGene.IsMating == true)
         {
-            if (creature.IsFemale == true)
+            if (creature.SexType == Sex.Types.Female)
                 reproductionGene.matingSession.ContinueSession();
 
             // Male does not control session but is still locked into it
@@ -56,15 +56,11 @@ public class GeneManager : MonoBehaviour
             return;
         }
 
-        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position) == true)
+        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position, creature.FoodTypeNeeded) == true)
         {
             hungerGene.Eat();
             return;
         }
-
-        // UPDATE VIEW OF THE WORLD
-        if (perceptionGene != null)
-            perceptionGene.UpdatePerception();
 
 
         // NEW ACTIONS
@@ -79,7 +75,7 @@ public class GeneManager : MonoBehaviour
                 Debug.Log("Mating urge is highest");
 
                 // Males begin the mating session
-                if (creature.IsFemale == false && reproductionGene.CanStartMating() == true)
+                if (creature.SexType == Sex.Types.Male && reproductionGene.CanStartMating() == true)
                 {
                     reproductionGene.StartMating();
                     return;
@@ -131,7 +127,7 @@ public class GeneManager : MonoBehaviour
         // ACTIONS
         if (reproductionGene != null && reproductionGene.IsMating == true)
         {
-            if (creature.IsFemale == true)
+            if (creature.SexType == Sex.Types.Female)
                 reproductionGene.matingSession.ContinueSession();
 
             // Male does not control session but is still locked into it
@@ -144,7 +140,7 @@ public class GeneManager : MonoBehaviour
             return;
         }
 
-        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position) == true)
+        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position, creature.FoodTypeNeeded) == true)
         {
             hungerGene.Eat();
             return;
@@ -160,12 +156,10 @@ public class GeneManager : MonoBehaviour
         // PERCEPTION
         if (perceptionGene != null)
         {
-            perceptionGene.UpdatePerception();
-
-            if (thirstGene != null && thirstGene.IsThirsty == true && perceptionGene.Perception.IsShoreTileInSight == true)
+            if (thirstGene != null && thirstGene.IsThirsty == true)
                 thirstGene.SeekWater(perceptionGene);
 
-            else if (hungerGene != null && hungerGene.IsHungry == true && perceptionGene.Perception.IsFoodInSight == true)
+            else if (hungerGene != null && hungerGene.IsHungry == true)
                 hungerGene.SeekFood(perceptionGene);
 
             else if (reproductionGene != null && reproductionGene.NeedsToMate == true)

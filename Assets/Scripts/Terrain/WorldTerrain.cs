@@ -93,6 +93,7 @@ abstract public class WorldTerrain
     {
         shoreTiles[x, y] = true;
         shoreTilesNbr++;
+        WorldPositions.SetTileAsShore(x, y);
     }
 
     static public void CountLandTile()

@@ -2,11 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Species
-{
-    Animal
-}
-
 public class CreatureSpawner : MonoBehaviour
 {
     static public CreatureSpawner Instance { get; private set; }
@@ -62,7 +57,7 @@ public class CreatureSpawner : MonoBehaviour
 
         GameObject creature = Instantiate(creaturePrefabs[(int)species], transform);
         Creature creatureScript = creature.GetComponent<Creature>();
-        creatureScript.Initialize(new GridCoord(x, y));
+        creatureScript.Initialize(new GridCoord(x, y), species, FoodType.Plant);
         GameManager.Instance.AddCreature(creatureScript);
         return creatureScript;
     }

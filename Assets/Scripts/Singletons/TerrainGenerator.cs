@@ -26,7 +26,7 @@ public class TerrainGenerator : MonoBehaviour
 
     [Tooltip("Percentage chance for starting food to spawn on land tile")]
     [Range(0, 1)]
-    public float foodDistribution = 0.15f;
+    public float plantDistribution = 0.15f;
 
     public bool autoUpdate = true;
 
@@ -55,8 +55,8 @@ public class TerrainGenerator : MonoBehaviour
         {
             needsUpdate = false;
             GenerateTerrain();
-            FoodSpawner.Instance.ClearFood();
-            FoodSpawner.Instance.SpawnFood(foodDistribution);
+            PlantSpawner.Instance.ClearPlants();
+            PlantSpawner.Instance.SpawnPlant(plantDistribution);
         }
     }
 
