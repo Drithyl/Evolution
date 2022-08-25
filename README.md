@@ -12,9 +12,11 @@ More details on the goals of the project can be found in my [midterm report](htt
 * Behaviour of creatures is determined by urge levels, some of which are genetic-related, like the urge to seek mates.
 * Individual and global statistics for better feedback: tiles walked, months aged, food and water consumed, causes of death, etc.
 * Working line graphs as 3d objects in the world to display feedback. At the moment, only population line graph is active.
+* FoodType enum to support different diets (herbivore and carnivore) through the same HungerGene without modification. Will allow easy addition of new carnivore species
 
 
 ## Next Steps
 
 * Creating more working graphs to display other statistics like average values of genes.
 * New carnivore species that prey on the herbivores to add a more active threat and means of population control.
+* Flesh out Species definition into its own class that will determine which Genes and which Gene value ranges each species has.
