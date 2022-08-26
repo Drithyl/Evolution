@@ -7,24 +7,21 @@ public struct GridCoord
 {
     private int x;
     private int y;
+    private Vector2 xy;
 
-    public int X
-    {
-        get { return x; }
-    }
-    public int Y
-    {
-        get { return y; }
-    }
-    public Vector2 XY
-    {
-        get { return new Vector2(X, Y); }
-    }
+
+    public int X => x;
+
+    public int Y => y;
+
+    public Vector2 XY => xy;
+
 
     public GridCoord(int xCoord, int yCoord)
     {
         x = xCoord;
         y = yCoord;
+        xy = new Vector2(x, y);
     }
 
     public override string ToString()
@@ -65,6 +62,14 @@ public struct GridCoord
     public static GridCoord operator - (GridCoord a, GridCoord b)
     {
         return new GridCoord(a.X - b.X, a.Y - b.Y);
+    }
+
+    
+    public static GridCoord Random(int width, int height)
+    {
+        int x = UnityEngine.Random.Range(0, width);
+        int y = UnityEngine.Random.Range(0, height);
+        return new GridCoord(x, y);
     }
 
 
@@ -185,30 +190,42 @@ public struct GridCoord
         throw new Exception("Coord provided is not an adjacent neighbour to this!");
     }
 
-    public GridCoord[] GetOrthogonalNeighbours()
+
+    static public GridCoord[] GetOrthogonalNeighbours(GridCoord tile)
     {
         return new GridCoord[]
         {
-            NorthCoord,
-            EastCoord,
-            SouthCoord,
-            WestCoord
+            tile.NorthCoord,
+            tile.EastCoord,
+            tile.SouthCoord,
+            tile.WestCoord
         };
     }
 
-    public GridCoord[] GetNeighbours()
+    static public GridCoord[] GetOrthogonalNeighbours(int x, int y)
+    {
+        return GetOrthogonalNeighbours(new GridCoord(x, y));
+    }
+
+
+    static public GridCoord[] GetNeighbours(GridCoord tile)
     {
         return new GridCoord[]
         {
-            NorthCoord,
-            NorthEastCoord,
-            EastCoord,
-            SouthEastCoord,
-            SouthCoord,
-            SouthWestCoord,
-            WestCoord,
-            NorthWestCoord
+            tile.NorthCoord,
+            tile.NorthEastCoord,
+            tile.EastCoord,
+            tile.SouthEastCoord,
+            tile.SouthCoord,
+            tile.SouthWestCoord,
+            tile.WestCoord,
+            tile.NorthWestCoord
         };
+    }
+
+    static public GridCoord[] GetNeighbours(int x, int y)
+    {
+        return GetNeighbours(new GridCoord(x, y));
     }
 
 

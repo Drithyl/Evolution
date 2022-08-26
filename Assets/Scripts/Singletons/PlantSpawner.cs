@@ -40,14 +40,16 @@ public class PlantSpawner : MonoBehaviour
 
     public void SpawnPlant(float foodChancePerTile)
     {
-        for (int x = 0; x < WorldTerrain.Width; x++)
+        for (int x = 0; x < WorldMap.Instance.Width; x++)
         {
-            for (int y = 0; y < WorldTerrain.Height; y++)
+            for (int y = 0; y < WorldMap.Instance.Height; y++)
             {
-                if (WorldTerrain.IsLand(x, y) == false)
+                WorldTile tile = WorldMap.Instance.GetWorldTile(x, y);
+
+                if (tile.Types.HasFlag(TerrainTypes.Land) == false)
                     continue;
 
-                if (WorldPositions.HasFoodAt(x, y, FoodType.Plant) == true)
+                if (tile.HasFood(FoodType.Plant) == true)
                     continue;
 
                 if (Random.value > foodChancePerTile)
@@ -55,21 +57,23 @@ public class PlantSpawner : MonoBehaviour
 
                 GameObject plant = Instantiate(foodPrefab, transform);
                 PlantFood foodScript = plant.GetComponent<PlantFood>();
-                foodScript.Initialize(new GridCoord(x, y));
+                foodScript.Initialize(tile.Coord);
             }
         }
     }
 
     public void SpawnPlant(float foodChancePerTile, int startingAmount)
     {
-        for (int x = 0; x < WorldTerrain.Width; x++)
+        for (int x = 0; x < WorldMap.Instance.Width; x++)
         {
-            for (int y = 0; y < WorldTerrain.Height; y++)
+            for (int y = 0; y < WorldMap.Instance.Height; y++)
             {
-                if (WorldTerrain.IsLand(x, y) == false)
+                WorldTile tile = WorldMap.Instance.GetWorldTile(x, y);
+
+                if (tile.Types.HasFlag(TerrainTypes.Land) == false)
                     continue;
 
-                if (WorldPositions.HasFoodAt(x, y, FoodType.Plant) == true)
+                if (tile.HasFood(FoodType.Plant) == true)
                     continue;
 
                 if (Random.value > foodChancePerTile)
@@ -77,7 +81,7 @@ public class PlantSpawner : MonoBehaviour
 
                 GameObject plant = Instantiate(foodPrefab, transform);
                 PlantFood foodScript = plant.GetComponent<PlantFood>();
-                foodScript.Initialize(new GridCoord(x, y), startingAmount);
+                foodScript.Initialize(tile.Coord, startingAmount);
             }
         }
     }

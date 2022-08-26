@@ -51,12 +51,12 @@ public class TerrainMesh
 
     public void GenerateMesh()
     {
-        for (int x = 0; x < WorldTerrain.Width; x++)
+        for (int x = 0; x < WorldMap.Instance.Width; x++)
         {
-            for (int y = 0; y < WorldTerrain.Height; y++)
+            for (int y = 0; y < WorldMap.Instance.Height; y++)
             {
-                GridCoord coord = new GridCoord(x, y);
-                GenerateMeshTile(coord);
+                WorldTile worldTile = WorldMap.Instance.GetWorldTile(x, y);
+                GenerateMeshTile(worldTile);
             }
         }
 
@@ -74,8 +74,9 @@ public class TerrainMesh
 
     public void GenerateNextStep()
     {
-        GridCoord currentCoord = new GridCoord(xCurrentStepIndex, yCurrentStepIndex);
-        GenerateMeshTile(currentCoord);
+        WorldTile currentTile = WorldMap.Instance.GetWorldTile(xCurrentStepIndex, yCurrentStepIndex);
+
+        GenerateMeshTile(currentTile);
         UpdateMesh();
         IncrementGenerationStepIndex();
     }
@@ -156,14 +157,14 @@ public class TerrainMesh
     {
         yCurrentStepIndex++;
 
-        if (yCurrentStepIndex >= WorldTerrain.Height)
+        if (yCurrentStepIndex >= WorldMap.Instance.Height)
         {
             yCurrentStepIndex = 0;
             xCurrentStepIndex++;
         }
 
         // Finished, reset to zero
-        if (xCurrentStepIndex >= WorldTerrain.Width)
+        if (xCurrentStepIndex >= WorldMap.Instance.Width)
         {
             xCurrentStepIndex = 0;
             isMeshComplete = true;
@@ -172,35 +173,16 @@ public class TerrainMesh
 
     // Generates the data required for a single "tile" within the mesh;
     // i.e. its four vertices, normals, triangles and uvs
-    private void GenerateMeshTile(GridCoord tileCoord)
+    private void GenerateMeshTile(WorldTile worldTile)
     {
         // The uv of this tile; basically what its height is in terms of its biome or colour
-        Vector2 uv = GetBiomeMappedUVAtHeight(WorldTerrain.GetTileHeight(tileCoord.X, tileCoord.Y));
+        Vector2 uv = GetBiomeMappedUVAtHeight(worldTile.HeightMapValue);
         uvs.AddRange(new Vector2[] { uv, uv, uv, uv });
-
-        // Basic information about the tile based on the heightmap's value
-        bool isLandTile = WorldTerrain.IsLand(tileCoord);
-        bool isWaterTile = WorldTerrain.IsWater(tileCoord);
-        bool isEdgeTile = WorldTerrain.IsEdge(tileCoord);
 
 
         int vertIndex = vertices.Count;
 
-        // The north-west, north-east, south-east and south-western corners of the tile,
-        // expressed in scene coordinates rather than as a grid. The Y value depends
-        // on the heightmap's value of this coordinate
-        Vector3 nw = WorldPositions.GetVertex(tileCoord, TileVertices.NW);
-        Vector3 ne = WorldPositions.GetVertex(tileCoord, TileVertices.NE);
-        Vector3 se = WorldPositions.GetVertex(tileCoord, TileVertices.SE);
-        Vector3 sw = WorldPositions.GetVertex(tileCoord, TileVertices.SW);
-
-        // Determine the exact centre of the tile, as this will be useful further down
-        // the line for movement and creature spawning, as well as other things
-        Vector3 tileCentre = new Vector3(nw.x + TerrainConstants.TILE_HALF_SIZE, nw.y, nw.z - TerrainConstants.TILE_HALF_SIZE);
-        WorldPositions.InitializeTile(tileCoord.X, tileCoord.Y, tileCentre);
-        WorldPositions.SetTileAsLand(tileCoord.X, tileCoord.Y);
-
-        Vector3[] tileVertices = { nw, ne, sw, se };
+        Vector3[] tileVertices = { worldTile.NW, worldTile.NE, worldTile.SW, worldTile.SE };
 
         // Add the vertices to our mesh' list of vertices, as well as the normals
         // (all are upwards, since each terrain tile is flat)
@@ -216,58 +198,31 @@ public class TerrainMesh
         // Debug text code to index tiles visually on the scene
         //CreateDebugTextAt(new Vector3(tileCentre.x, tileCentre.y + 2, tileCentre.z), tileCoord.ToString());
 
-        // Count tiles as land or water for statistics
-        if (isLandTile == true)
-            WorldTerrain.CountLandTile();
-
-        else if (isWaterTile == true)
-            WorldTerrain.CountWaterTile();
 
         // If the tile is at water level and not an edge tile, we are done
-        if (isLandTile == false && isEdgeTile == false)
+        if (worldTile.Types.HasFlag(TerrainTypes.Land) == false && worldTile.Types.HasFlag(TerrainTypes.Edge) == false)
             return;
 
         // Otherwise it will need more triangles, to create the vertical sides of the tile,
         // like the level difference between land and water, or the lateral edge of the map
-        GenerateTileNeighbourBoundaries(tileCoord);
+        GenerateTileNeighbourBoundaries(worldTile);
     }
 
-    private void GenerateTileNeighbourBoundaries(GridCoord tileCoord)
+    private void GenerateTileNeighbourBoundaries(WorldTile worldTile)
     {
-        Vector2 uv = GetBiomeMappedUVAtHeight(WorldTerrain.GetTileHeight(tileCoord.X, tileCoord.Y));
-        bool isWaterTile = WorldTerrain.IsLand(tileCoord);
-        bool isLandTile = WorldTerrain.IsLand(tileCoord);
+        Vector2 uv = GetBiomeMappedUVAtHeight(worldTile.HeightMapValue);
+        GridCoord[] neighbours = GridCoord.GetNeighbours(worldTile.Coord);
 
 
-        GridCoord[] neighbours =
+        foreach(GridCoord neighbour in neighbours)
         {
-            tileCoord.NorthCoord,
-            tileCoord.SouthCoord,
-            tileCoord.WestCoord,
-            tileCoord.EastCoord
-        };
+            int vertIndex = vertices.Count;
+            bool isNeighbourOutOfBounds = WorldMap.Instance.IsOutOfBounds(neighbour);
 
 
-        for (int i = 0; i < neighbours.Length; i++)
-        {
-            GridCoord neighbour = neighbours[i];
-
-            bool isNeighbourOutOfBounds = WorldTerrain.IsOutOfBounds(neighbour.X, neighbour.Y);
-            bool isNeighbourWater = false;
-
-
-            if (!isNeighbourOutOfBounds)
-                isNeighbourWater = WorldTerrain.IsWater(neighbour.X, neighbour.Y);
-
-            if (isLandTile == true && isNeighbourWater == true)
-                WorldTerrain.SetTileAsShore(tileCoord.X, tileCoord.Y);
-
-            else WorldTerrain.CountInlandTile();
-
-
-            bool needsSideFillingTriangles = (isLandTile && isNeighbourWater) || isNeighbourOutOfBounds;
-
-            if (needsSideFillingTriangles == false)
+            // If the side downwards of the tile doesn't need filling with a wall
+            // (to avoid visual gaps), then we can continue to next neighbour
+            if (DoesTileEdgeNeedFilling(worldTile, isNeighbourOutOfBounds) == false)
                 continue;
 
 
@@ -276,38 +231,58 @@ public class TerrainMesh
             float sideDepth = TerrainConstants.LAND_TO_WATER_DEPTH;
 
             // Tile is a land and neighbour is the out of bounds edge
-            if (isNeighbourOutOfBounds == true && isLandTile == true)
+            if (isNeighbourOutOfBounds == true && worldTile.Types.HasFlag(TerrainTypes.Land) == true)
                 sideDepth = TerrainConstants.LAND_TO_EDGE_DEPTH;
 
             // If our main tile is water and the neighbour is on the edge, we just
             // need to extend the edge height down from the water height
-            else if (isNeighbourOutOfBounds == true && isWaterTile == true)
+            else if (isNeighbourOutOfBounds == true && worldTile.Types.HasFlag(TerrainTypes.Water) == true)
                 sideDepth = TerrainConstants.WATER_TO_EDGE_DEPTH;
 
 
-            List<TileVertices> adjacentVertices = WorldPositions.GetAdjacentVertices(tileCoord, neighbours[i]);
-            Vector3 adjacentVertexA = WorldPositions.GetVertex(tileCoord, adjacentVertices[0]);
-            Vector3 adjacentVertexABottom = adjacentVertexA + Vector3.down * sideDepth;
-            Vector3 adjacentVertexB = WorldPositions.GetVertex(tileCoord, adjacentVertices[1]);
-            Vector3 adjacentVertexBBottom = adjacentVertexB + Vector3.down * sideDepth;
+            // Get vertices that are shared between our base tile and this neighbour
+            (Vector3 a, Vector3 b) adjacentVertices = 
+                TileVertices.SharedAdjacentVerticesFromTo(worldTile, neighbour);
 
+            // Get the vertices below those shared vertices to create a rectangular side wall
+            Vector3 aBottom = adjacentVertices.a + Vector3.down * sideDepth;
+            Vector3 bBottom = adjacentVertices.b + Vector3.down * sideDepth;
 
-            int vertIndex = vertices.Count;
-            vertices.Add(adjacentVertexA);
-            vertices.Add(adjacentVertexABottom);
-            vertices.Add(adjacentVertexB);
-            vertices.Add(adjacentVertexBBottom);
+            // Add the vertices to our mesh
+            vertices.Add(adjacentVertices.a);
+            vertices.Add(aBottom);
+            vertices.Add(adjacentVertices.b);
+            vertices.Add(bBottom);
 
-
-            uvs.AddRange(new Vector2[] { uv, uv, uv, uv });
-
+            // Add the indices of the vertices to the mesh' triangles
             triangles.AddRange(new int[] { vertIndex, vertIndex + 1, vertIndex + 2 });
             triangles.AddRange(new int[] { vertIndex + 1, vertIndex + 3, vertIndex + 2 });
 
-            Vector3 edgeNormalDirection = tileCoord.DirectionTo(neighbours[i]);
+            // Add the uvs of the side wall
+            uvs.AddRange(new Vector2[] { uv, uv, uv, uv });
+
+            // Find the normal direction of the side wall and add it to our normals
+            Vector3 edgeNormalDirection = worldTile.Coord.DirectionTo(neighbour);
             normals.AddRange(new Vector3[] { edgeNormalDirection, edgeNormalDirection, edgeNormalDirection, edgeNormalDirection });
         }
     }
+
+    Vector2 GetBiomeMappedUVAtHeight(float height)
+    {
+        // Find current biome
+        int biomeIndex = BiomeManager.Instance.GetBiomeIndexAtHeight(height);
+        float mappedHeight = BiomeManager.Instance.GetBiomeMappedHeight(height, biomeIndex);
+
+        // UV stores x: biomeIndex and y: val between 0 and 1 for how close to prev/next biome
+        Vector2 uv = new Vector2(biomeIndex, mappedHeight);
+        return uv;
+    }
+
+    private bool DoesTileEdgeNeedFilling(WorldTile tile, bool isNeighbourOutOfBounds)
+    {
+        return tile.Types.HasFlag(TerrainTypes.Shore) || isNeighbourOutOfBounds == true;
+    }
+
 
     void CreateDebugTextAt(Vector3 pos, string text)
     {
@@ -334,29 +309,5 @@ public class TerrainMesh
         vertexSphere.name = pos.ToString();
         vertexSphere.transform.position = pos;
         vertexSphere.transform.SetParent(verticesParent);
-    }
-
-    Vector2 GetBiomeMappedUVAtHeight(float height)
-    {
-        // Find current biome
-        int biomeIndex = BiomeManager.Instance.GetBiomeIndexAtHeight(height);
-        float mappedHeight = BiomeManager.Instance.GetBiomeMappedHeight(height, biomeIndex);
-
-        // UV stores x: biomeIndex and y: val between 0 and 1 for how close to prev/next biome
-        Vector2 uv = new Vector2(biomeIndex, mappedHeight);
-        return uv;
-    }
-
-
-
-    void AddTileTriangles(int firstIndex, int secondIndex, int thirdIndex, int fourthIndex)
-    {
-        triangles.Add(firstIndex);
-        triangles.Add(secondIndex);
-        triangles.Add(thirdIndex);
-
-        triangles.Add(firstIndex);
-        triangles.Add(thirdIndex);
-        triangles.Add(fourthIndex);
     }
 }

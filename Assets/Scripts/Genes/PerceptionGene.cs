@@ -13,10 +13,6 @@ public class PerceptionGene : Gene
     public int DistanceInt { get { return Mathf.FloorToInt(Distance); } }
 
 
-    private PerceptionField _perception;
-    //public PerceptionField Perception { get { return _perception; } }
-
-
     public override float UrgeLevel => 0;
     override public string Name { get { return "Perception"; } }
 
@@ -46,10 +42,4 @@ public class PerceptionGene : Gene
 
         _distance = Mathf.Max(1, Distance + Random.Range(-perceptionMutatePercent, perceptionMutatePercent));
     }
-
-    /*public void UpdatePerception()
-    {
-        Creature parent = GetComponent<Creature>();
-        _perception = new PerceptionField(parent.Position, Mathf.FloorToInt(Distance));
-    }*/
 }

@@ -62,10 +62,11 @@ public class AStar
             // If not the end, remove this tile from the openTiles, and get its land neighbours
             openTiles.RemoveAt(lowestScoreIndex);
             //openTiles.Remove(current);
-            List<GridCoord> neighbours = WorldPositions.GetLandNeighbours(current);
-        
+            //List<GridCoord> neighbours = WorldPositions.GetLandNeighbours(current);
+            List<GridCoord> neighbours = WorldMap.Instance.GetNeighbourCoords(current, TerrainTypes.Land);
+
             // For each neighbour to our current tile...
-            foreach(GridCoord neighbour in neighbours)
+            foreach (GridCoord neighbour in neighbours)
             {
                 // ...find its distance to the start point, and to the end point
                 //Debug.Log("***Neighbour " + neighbour.ToString() + "***");

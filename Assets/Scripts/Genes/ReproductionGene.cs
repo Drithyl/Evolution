@@ -52,11 +52,11 @@ public class ReproductionGene : Gene
     { 
         get 
         {
-            if (parent.SexType == Sex.Types.Female)
+            if (parent.SexType == Sex.Types.Male)
                 return false;
 
             return _isPregnant; 
-        } 
+        }
     }
 
 
@@ -192,7 +192,7 @@ public class ReproductionGene : Gene
 
     public void SeekMate(PerceptionGene perceptionGene)
     {
-        Creature closestMate = WorldPositions.ClosestCreatureInRadius(
+        Creature closestMate = WorldMap.Instance.ClosestCreatureInRadius(
             parent.Position,
             perceptionGene.DistanceInt,
             parent.Species,
@@ -277,7 +277,21 @@ public class ReproductionGene : Gene
 
     public void SpawnOffspring()
     {
+        WorldTile emptyTile;
+        TerrainSearchOptions options = new TerrainSearchOptions();
         int numberOfLeftGenes = Random.Range(0, parent.Genome.NumberOfGenes);
+
+        options.patternRadius = 1;
+        options.isCentreIncluded = false;
+        options.includedTerrain = TerrainTypes.Land | TerrainTypes.Empty;
+
+        emptyTile = WorldMap.Instance.RandomTileFrom(parent.Position, options);
+
+        if (emptyTile == null)
+        {
+            Debug.Log("No empty tile to spawn offspring; waiting another turn");
+            return;
+        }
 
         _offspringLeftToSpawn--;
         statistics.OffspringCreated++;
@@ -292,8 +306,8 @@ public class ReproductionGene : Gene
         maternalGenome.right.CopyTo(inheritedGenome, paternalGenome.left.Length);
         //Debug.Log("Inherited genome: " + inheritedGenome.Length);
 
-        Creature offspring = CreatureSpawner.Instance.Spawn(parent.Species, parent.Position);
-        offspring.CompleteBirthProcess(inheritedGenome, MonthsOfPregnancy, _targetMateStatistics, statistics);
+        Creature offspring = CreatureSpawner.Instance.Spawn(parent.Species, emptyTile.Coord);
+        offspring.CompleteBirthProcess(inheritedGenome, pregnancyProgress, _targetMateStatistics, statistics);
 
         if (TargetMate == null)
             Debug.Log("Father died during pregnancy!");

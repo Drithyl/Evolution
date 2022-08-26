@@ -8,7 +8,7 @@ public class MeatFood : Food
     private HungerGene hungerGene;
 
     public override FoodType FoodType => FoodType.Meat;
-    override public GridCoord Position { get { return creature.Position; } }
+    override public GridCoord Position { get { return creature.Position; } set { creature.Position = value; } }
 
 
     override public void Initialize(GridCoord foodPosition)

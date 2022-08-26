@@ -36,7 +36,7 @@ public class CreatureSpawner : MonoBehaviour
 
     private void RandomizeSpawnPoint()
     {
-        GridCoord coord = WorldTerrain.GetRandomLandTile();
+        GridCoord coord = WorldMap.Instance.RandomLandTile().Coord;
         x = coord.X;
         y = coord.Y;
     }
@@ -48,9 +48,10 @@ public class CreatureSpawner : MonoBehaviour
 
     public Creature Spawn(Species species, int x, int y)
     {
-        Debug.Log("Spawning creature of species " + species.ToString() + " (" + (int)species + ")");
-        Vector3 spawnPos = WorldPositions.GetTileCentre(x, y);
-        Debug.Log("At world tile " + spawnPos.ToString());
+        //Debug.Log("Spawning creature of species " + species.ToString() + " (" + (int)species + ")");
+        WorldTile tile = WorldMap.Instance.GetWorldTile(x, y);
+        Vector3 spawnPos = tile.Centre;
+        //Debug.Log("At scene position " + spawnPos.ToString());
 
         // For next spawn
         RandomizeSpawnPoint();

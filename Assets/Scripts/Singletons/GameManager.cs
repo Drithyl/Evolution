@@ -59,8 +59,6 @@ public class GameManager : MonoBehaviour
     private int _nextMonthCounter;
 
     private List<Creature> creatures = new List<Creature>();
-    private List<Creature> creaturesAddQueue = new List<Creature>();
-    private List<Creature> creaturesRemoveQueue = new List<Creature>();
     public int NumberOfCreatures { get { return creatures.Count; } }
 
 
@@ -85,11 +83,11 @@ public class GameManager : MonoBehaviour
         TerrainGenerator.Instance.Initialize();
 
         /*float startTime = Time.realtimeSinceStartup;
-        WorldPositions.SpiralSpeedTest(Mathf.FloorToInt(WorldTerrain.Width * 0.5f), Mathf.FloorToInt(WorldTerrain.Height), Mathf.FloorToInt(WorldTerrain.Width * 0.2f));
+        WorldPositions.SpiralSpeedTest(Mathf.FloorToInt(WorldMap.Instance.Width * 0.5f), Mathf.FloorToInt(WorldMap.Instance.Height), Mathf.FloorToInt(WorldMap.Instance.Width * 0.2f));
         Debug.Log("Spiral time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");
 
         startTime = Time.realtimeSinceStartup;
-        WorldPositions.SquareSpeedTest(Mathf.FloorToInt(WorldTerrain.Width * 0.5f), Mathf.FloorToInt(WorldTerrain.Height), Mathf.FloorToInt(WorldTerrain.Width * 0.2f));
+        WorldPositions.SquareSpeedTest(Mathf.FloorToInt(WorldMap.Instance.Width * 0.5f), Mathf.FloorToInt(WorldMap.Instance.Height), Mathf.FloorToInt(WorldMap.Instance.Width * 0.2f));
         Debug.Log("Square time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");*/
 
         for (int i = 0; i < numOfStartingCreatures; i++)
@@ -109,7 +107,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (creatures.Count <= 0 && creaturesAddQueue.Count <= 0 && pauseTimeWhenNoCreatures == true)
+        if (creatures.Count <= 0 && pauseTimeWhenNoCreatures == true)
             return;
 
 
@@ -124,22 +122,13 @@ public class GameManager : MonoBehaviour
             GlobalStatistics.Instance.UpdateMonthlyStatistics();
         }
 
-        foreach (Creature creature in creatures)
+        // Reverse loop so creatures can be removed from the list
+        // during the loop itself without problems
+        for (int i = creatures.Count - 1; i >= 0; i--)
         {
-            AgeGene ageGene = creature.GetComponent<AgeGene>();
-            MovementGene movementGene = creature.GetComponent<MovementGene>();
-
-            if (IsNewMonth == true && ageGene != null)
-                ageGene.GrowOld();
-
-            if (movementGene != null && movementGene.IsMoving == true)
-                movementGene.AnimateMove();
-
-            if (IsNewTurn == true)
-                GeneManager.Instance.UpdateImpulse(creature);
+            Creature creature = creatures[i];
+            UpdateCreature(creature);
         }
-
-        UpdateCreatureList();
     }
 
     // For time management, see second example in:
@@ -172,6 +161,21 @@ public class GameManager : MonoBehaviour
         return isNewMonth;
     }
 
+    private void UpdateCreature(Creature creature)
+    {
+        AgeGene ageGene = creature.GetComponent<AgeGene>();
+        MovementGene movementGene = creature.GetComponent<MovementGene>();
+
+        if (IsNewMonth == true && ageGene != null)
+            ageGene.GrowOld();
+
+        if (movementGene != null && movementGene.IsMoving == true)
+            movementGene.AnimateMove();
+
+        if (IsNewTurn == true)
+            GeneManager.Instance.UpdateImpulse(creature);
+    }
+
     private void GrowFood()
     {
         foreach (PlantFood food in foodSupply)
@@ -188,46 +192,28 @@ public class GameManager : MonoBehaviour
         PlantSpawner.Instance.SpawnPlant(chance, startFoodOnNewGrowth);
     }
 
-    private void UpdateCreatureList()
-    {
-        foreach (Creature creature in creaturesAddQueue)
-        {
-            creatures.Add(creature);
-            WorldPositions.SetCreaturePosition(creature, creature.Position);
-        }
-
-        foreach (Creature creature in creaturesRemoveQueue)
-        {
-            creatures.Remove(creature);
-            WorldPositions.RemoveCreatureFromPosition(creature, creature.Position);
-        }
-
-        creaturesAddQueue.Clear();
-        creaturesRemoveQueue.Clear();
-    }
-
     public void AddCreature(Creature creature)
     {
-        creaturesAddQueue.Add(creature);
+        creatures.Add(creature);
+        WorldMap.Instance.SetCreaturePosition(creature, creature.Position);
     }
 
     public void RemoveCreature(Creature creature)
     {
-        //creaturesRemoveQueue.Remove(creature);
         creatures.Remove(creature);
-        WorldPositions.RemoveCreatureFromPosition(creature, creature.Position);
+        WorldMap.Instance.RemoveCreatureFromPosition( creature.Position);
     }
 
     public void AddPlantFoodToSupply(PlantFood food)
     {
         foodSupply.Add(food);
-        WorldPositions.SetFoodPosition(food, food.Position);
+        WorldMap.Instance.SetFoodPosition(food, food.Position);
     }
 
     public void RemoveFoodFromSupply(PlantFood food)
     {
         foodSupply.Remove(food);
-        WorldPositions.RemoveFoodFromPosition(food, food.Position);
+        WorldMap.Instance.RemoveFoodFromPosition(food, food.Position);
     }
 
     private void EnsureSingleton()

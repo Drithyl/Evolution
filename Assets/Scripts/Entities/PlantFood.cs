@@ -26,7 +26,7 @@ public class PlantFood : Food
     public override FoodType FoodType => FoodType.Plant;
 
     private GridCoord _position;
-    override public GridCoord Position { get { return _position; } }
+    override public GridCoord Position { get { return _position; } set { _position = value; } }
 
 
     override public void Initialize(GridCoord foodPosition)
@@ -38,7 +38,7 @@ public class PlantFood : Food
 
         _position = foodPosition;
         GameManager.Instance.AddPlantFoodToSupply(this);
-        transform.position = WorldPositions.GetTileCentre(Position) + (Vector3.up * transform.localScale.y * 0.5f);
+        transform.position = WorldMap.Instance.GetWorldTile(Position).Centre + (Vector3.up * transform.localScale.y * 0.5f);
 
         name = "Plant " + Position.ToString();
     }

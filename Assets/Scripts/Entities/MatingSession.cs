@@ -54,6 +54,20 @@ public class MatingSession
 
     public void ContinueSession()
     {
+        if (mother == null)
+        {
+            Debug.Log("Female died while mating!");
+            CancelSession();
+            return;
+        }
+
+        if (father == null)
+        {
+            Debug.Log("Male died while mating!");
+            CancelSession();
+            return;
+        }
+
         mother.SetStatusText(CONTINUE_MATING_TEXT);
         father.SetStatusText(CONTINUE_MATING_TEXT);
 

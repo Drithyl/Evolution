@@ -110,7 +110,7 @@ public class HungerGene : Gene
 
     public void Eat()
     {
-        Food food = WorldPositions.GetFoodAt(parent.Position, parent.FoodTypeNeeded);
+        Food food = WorldMap.Instance.GetFoodAt(parent.Position, parent.FoodTypeNeeded);
 
         int missingNutrition = _maxHunger - _currentHunger;
         int nutritionMouthful = Mathf.FloorToInt(MouthfulNutrition);
@@ -127,7 +127,7 @@ public class HungerGene : Gene
     public void SeekFood(PerceptionGene perceptionGene)
     {
         MovementGene movementGene = GetComponent<MovementGene>();
-        Food food = WorldPositions.ClosestFreeFoodInRadius(
+        Food food = WorldMap.Instance.ClosestFoodInRadius(
             parent.Position, 
             perceptionGene.DistanceInt,
             parent.FoodTypeNeeded

@@ -4,7 +4,7 @@ using UnityEngine;
 
 abstract public class Food : MonoBehaviour
 {
-    abstract public GridCoord Position { get; }
+    abstract public GridCoord Position { get; set; }
     abstract public FoodType FoodType { get; }
 
     abstract public void Initialize(GridCoord foodPosition);

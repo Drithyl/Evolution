@@ -20,8 +20,8 @@ public class MovementGene : Gene
     public List<GridCoord> MoveQueue { get { return _moveQueue; } }
 
 
-    private GridCoord _currentMoveTarget;
-    public GridCoord CurrentMoveTarget { get { return _currentMoveTarget; } }
+    private WorldTile _currentMoveTarget;
+    public WorldTile CurrentMoveTarget { get { return _currentMoveTarget; } }
 
 
     [SerializeField]
@@ -46,6 +46,7 @@ public class MovementGene : Gene
     private void Update()
     {
         DebugExplorePath();
+        _secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
     }
 
     public override void Randomize()
@@ -87,12 +88,26 @@ public class MovementGene : Gene
 
     public void Explore(PerceptionGene perceptionGene)
     {
-        GridCoord randomTile = WorldPositions.RandomEmptyLandTileInRadius(
+        WorldTile randomTile;
+        TerrainSearchOptions options = new TerrainSearchOptions();
+
+        options.patternRadius = perceptionGene.DistanceInt;
+        options.includedTerrain = TerrainTypes.Land | TerrainTypes.Empty;
+        options.searchDistance = Mathf.Pow(perceptionGene.DistanceInt, 2);
+        options.distanceCalculation = GridCoord.GridSqrDistance;
+
+        randomTile = WorldMap.Instance.RandomTileFrom(
             parent.Position,
-            perceptionGene.DistanceInt
+            options
         );
 
-        List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile);
+        if (randomTile == null)
+        {
+            Debug.Log("Too crowded to explore; ignoring");
+            return;
+        }
+
+        List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile.Coord);
         
         if (path == null)
         {
@@ -101,20 +116,20 @@ public class MovementGene : Gene
         }
 
         _moveQueue = path;
-        parent.SetStatusText("Exploring to " + randomTile.ToString());
+        parent.SetStatusText("Exploring to " + randomTile.Coord.ToString());
         //Debug.Log("Exploring towards tile " + randomTile.ToString());
-
-        if (_moveQueue == null)
-            Debug.Log("Invalid path received");
     }
 
 
     public void StartMove()
     {
-        _currentMoveTarget = _moveQueue[0];
+        _currentMoveTarget = WorldMap.Instance.GetWorldTile(_moveQueue[0]);
 
-        if (WorldTerrain.IsWalkable(CurrentMoveTarget) == false)
+        if (_currentMoveTarget.IsWalkable == false)
         {
+            Debug.Log("Tile not walkable!");
+            _currentMoveTarget = null;
+
             if (MoveQueue.Count == 1)
             {
                 //Debug.Log("Last tile queued is blocked; stopping here");
@@ -133,8 +148,8 @@ public class MovementGene : Gene
         _isMoving = true;
         _moveQueue.RemoveAt(0);
 
-        parent.Position = _currentMoveTarget;
-        WorldPositions.SetCreaturePosition(parent, parent.Position);
+        // Let the position be set by a single source at all levels rather than here
+        WorldMap.Instance.SetCreaturePosition(parent, _currentMoveTarget.Coord);
 
         // Consume nutrition upfront, since the position is changed upfront too
         ConsumeNutrition();
@@ -150,10 +165,10 @@ public class MovementGene : Gene
         // For Lerping explanation, see answer marked as solution:
         // https://gamedev.stackexchange.com/questions/149103/why-use-time-deltatime-in-lerping-functions
         moveProgress = Mathf.Clamp01(moveProgress + Time.deltaTime / SecondsToCompleteMove);
-
+        
         transform.position = Vector3.Lerp(
             transform.position,
-            WorldPositions.GetTileCentre(CurrentMoveTarget),
+            CurrentMoveTarget.Centre,
             moveProgress
         );
 
@@ -167,7 +182,8 @@ public class MovementGene : Gene
         _isMoving = false;
         moveProgress = 0;
         statistics.TilesTraveled++;
-        transform.position = WorldPositions.GetTileCentre(CurrentMoveTarget);
+        transform.position = CurrentMoveTarget.Centre;
+        _currentMoveTarget = null;
     }
 
     private void ConsumeNutrition()
@@ -187,14 +203,15 @@ public class MovementGene : Gene
         if (MoveQueue == null || MoveQueue.Count == 0)
             return;
 
+        WorldTile finalTile = WorldMap.Instance.GetWorldTile(MoveQueue[MoveQueue.Count - 1]);
+        Debug.DrawRay(finalTile.Centre, Vector3.up, Color.yellow);
 
-        Debug.DrawRay(WorldPositions.GetTileCentre(MoveQueue[MoveQueue.Count - 1]), Vector3.up, Color.yellow);
-
-        GridCoord current = parent.Position;
+        WorldTile current = WorldMap.Instance.GetWorldTile(parent.Position);
         foreach (GridCoord coord in MoveQueue)
         {
-            Debug.DrawLine(WorldPositions.GetTileCentre(current), WorldPositions.GetTileCentre(coord), Color.magenta);
-            current = coord;
+            WorldTile tile = WorldMap.Instance.GetWorldTile(coord);
+            Debug.DrawLine(current.Centre, tile.Centre, Color.magenta);
+            current = tile;
         }
 
         /*List<GridCoord> perceptionRadius = WorldTerrain.GetLandWithinDistance(position, (int)genome.Perception);

@@ -15,4 +15,13 @@ public class TerrainConstants : MonoBehaviour
     public const float LAND_TO_WATER_DEPTH = 0.2f;
     public const float WATER_TO_EDGE_DEPTH = 0.2f;
     public const float LAND_TO_EDGE_DEPTH = LAND_TO_WATER_DEPTH + WATER_TO_EDGE_DEPTH;
+
+
+    public static float TerrainHeight(bool isWater)
+    {
+        if (isWater == true)
+            return WATER_LEVEL_HEIGHT;
+
+        return LAND_LEVEL_HEIGHT;
+    }
 }

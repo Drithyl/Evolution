@@ -24,6 +24,8 @@ public class GeneManager : MonoBehaviour
         MovementGene movementGene = creature.GetComponent<MovementGene>();
         ReproductionGene reproductionGene = creature.GetComponent<ReproductionGene>();
 
+        WorldTile creatureWorldTile = WorldMap.Instance.GetWorldTile(creature.Position);
+
         Gene mostUrgentImpulse;
         creature.ClearStatusText();
 
@@ -50,13 +52,13 @@ public class GeneManager : MonoBehaviour
             return;
         }
 
-        if (thirstGene != null && thirstGene.IsSeekingWater == true && WorldTerrain.IsTileShore(creature.Position) == true)
+        if (thirstGene != null && thirstGene.IsSeekingWater == true && creatureWorldTile.Types.HasFlag(TerrainTypes.Shore) == true)
         {
             thirstGene.Drink();
             return;
         }
 
-        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position, creature.FoodTypeNeeded) == true)
+        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldMap.Instance.HasFoodAt(creature.Position, creature.FoodTypeNeeded) == true)
         {
             hungerGene.Eat();
             return;
@@ -72,8 +74,6 @@ public class GeneManager : MonoBehaviour
             
             if (mostUrgentImpulse == reproductionGene)
             {
-                Debug.Log("Mating urge is highest");
-
                 // Males begin the mating session
                 if (creature.SexType == Sex.Types.Male && reproductionGene.CanStartMating() == true)
                 {
@@ -82,10 +82,7 @@ public class GeneManager : MonoBehaviour
                 }
 
                 else if (perceptionGene != null)
-                {
-                    Debug.Log("Seeking new mate");
                     reproductionGene.SeekMate(perceptionGene);
-                }
             }
 
             else if (mostUrgentImpulse == hungerGene && perceptionGene != null)
@@ -97,77 +94,6 @@ public class GeneManager : MonoBehaviour
 
 
         // MOVEMENT FOLLOW-UP
-        if (movementGene != null)
-        {
-            if (movementGene.HasMoveQueued == true)
-                movementGene.StartMove();
-
-            else if (perceptionGene != null)
-                movementGene.Explore(perceptionGene);
-        }
-    }
-
-    public void UpdateBehaviour(Creature creature)
-    {
-        ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
-        HungerGene hungerGene = creature.GetComponent<HungerGene>();
-        PerceptionGene perceptionGene = creature.GetComponent<PerceptionGene>();
-        MovementGene movementGene = creature.GetComponent<MovementGene>();
-        ReproductionGene reproductionGene = creature.GetComponent<ReproductionGene>();
-
-        creature.ClearStatusText();
-
-        if (creature.IsDying == true)
-            return;
-
-        if (movementGene != null && movementGene.IsMoving == true)
-            return;
-
-
-        // ACTIONS
-        if (reproductionGene != null && reproductionGene.IsMating == true)
-        {
-            if (creature.SexType == Sex.Types.Female)
-                reproductionGene.matingSession.ContinueSession();
-
-            // Male does not control session but is still locked into it
-            return;
-        }
-
-        if (thirstGene != null && thirstGene.IsSeekingWater == true && WorldTerrain.IsTileShore(creature.Position) == true)
-        {
-            thirstGene.Drink();
-            return;
-        }
-
-        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldPositions.HasFoodAt(creature.Position, creature.FoodTypeNeeded) == true)
-        {
-            hungerGene.Eat();
-            return;
-        }
-
-        if (reproductionGene != null && reproductionGene.NeedsToMate == true && reproductionGene.IsMating == false && reproductionGene.HasMate == true && GridCoord.AreAdjacent(creature.Position, reproductionGene.TargetMate.Position) == true)
-        {
-            reproductionGene.StartMating();
-            return;
-        }
-
-
-        // PERCEPTION
-        if (perceptionGene != null)
-        {
-            if (thirstGene != null && thirstGene.IsThirsty == true)
-                thirstGene.SeekWater(perceptionGene);
-
-            else if (hungerGene != null && hungerGene.IsHungry == true)
-                hungerGene.SeekFood(perceptionGene);
-
-            else if (reproductionGene != null && reproductionGene.NeedsToMate == true)
-                reproductionGene.SeekMate(perceptionGene);
-        }
-
-
-        // PERCEPTION FOLLOW-UP
         if (movementGene != null)
         {
             if (movementGene.HasMoveQueued == true)

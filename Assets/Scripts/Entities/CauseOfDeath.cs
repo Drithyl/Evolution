@@ -7,5 +7,6 @@ public enum CauseOfDeath
     OldAge,
     Thirst,
     Starvation,
-    Devoured
+    Devoured,
+    Overcrowding
 }

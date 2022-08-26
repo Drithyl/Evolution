@@ -42,12 +42,7 @@ public class EnumerablePatterns
                 stepsToTurn = stepsTaken + (1 + Mathf.FloorToInt(turnsTaken * 0.5f));
             }
 
-            // Check the boundaries of our x index
-            if (indexesToReturn.x < 0 || indexesToReturn.x >= array.GetLength(0))
-                continue;
-
-            // Check the boundaries of our y index
-            if (indexesToReturn.y < 0 || indexesToReturn.y >= array.GetLength(1))
+            if (IsOutOfBounds(indexesToReturn.x, indexesToReturn.y, array) == true)
                 continue;
 
             // Return original value of this iteration, before the steps taken
@@ -128,12 +123,7 @@ public class EnumerablePatterns
                 stepsToTurn = stepsTaken + (1 + Mathf.FloorToInt(turnsTaken * 0.5f));
             }
 
-            // Check the boundaries of our x index
-            if (indexesToReturn.x < 0 || indexesToReturn.x >= array.GetLength(0))
-                continue;
-
-            // Check the boundaries of our y index
-            if (indexesToReturn.y < 0 || indexesToReturn.y >= array.GetLength(1))
+            if (IsOutOfBounds(indexesToReturn.x, indexesToReturn.y, array) == true)
                 continue;
 
             // Check that the current tile is within the sqr distance of the centre
@@ -168,12 +158,7 @@ public class EnumerablePatterns
         {
             for (int y = startY; y <= endY; y++)
             {
-                // Check the boundaries of our x index
-                if (x < 0 || x >= array.GetLength(0))
-                    continue;
-
-                // Check the boundaries of our y index
-                if (y < 0 || y >= array.GetLength(1))
+                if (IsOutOfBounds(x, y, array) == true)
                     continue;
 
                 yield return array[x, y];
@@ -207,12 +192,7 @@ public class EnumerablePatterns
         {
             for (int y = startY; y <= endY; y++)
             {
-                // Check the boundaries of our x index
-                if (x < 0 || x >= array.GetLength(0))
-                    continue;
-
-                // Check the boundaries of our y index
-                if (y < 0 || y >= array.GetLength(1))
+                if (IsOutOfBounds(x, y, array) == true)
                     continue;
 
                 if (SqrDistance(cX, cY, x, y) > distance)
@@ -256,12 +236,7 @@ public class EnumerablePatterns
         {
             for (int y = startY; y <= endY; y++)
             {
-                // Check the boundaries of our x index
-                if (x < 0 || x >= array.GetLength(0))
-                    continue;
-
-                // Check the boundaries of our y index
-                if (y < 0 || y >= array.GetLength(1))
+                if (IsOutOfBounds(x, y, array) == true)
                     continue;
 
                 if (ManhattanDistance(cX, cY, x, y) > radius)
@@ -270,6 +245,20 @@ public class EnumerablePatterns
                 yield return array[x, y];
             }
         }
+    }
+
+
+    private static bool IsOutOfBounds<T>(int x, int y, T[,] array)
+    {
+        // Check the boundaries of our x index
+        if (x < 0 || x >= array.GetLength(0))
+            return true;
+
+        // Check the boundaries of our y index
+        if (y < 0 || y >= array.GetLength(1))
+            return true;
+
+        return false;
     }
 
 

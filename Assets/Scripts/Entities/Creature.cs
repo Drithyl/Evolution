@@ -72,7 +72,7 @@ public class Creature : MonoBehaviour
         _position = position;
         _species = species;
         _foodTypeNeeded = foodTypeNeeded;
-        transform.position = WorldPositions.GetTileCentre(Position);
+        transform.position = WorldMap.Instance.GetWorldTile(Position).Centre;
 
 
         if (Random.value < 0.5f)
@@ -153,5 +153,15 @@ public class Creature : MonoBehaviour
 
         statistics.parents.mother = motherStatistics;
         statistics.parents.father = fatherStatistics;
+
+
+        // If it stayed in the womb too long (normally because
+        // there were no free tiles on which to spawn) to the
+        // point where it's past its max age, it will die instantly
+        if (startingAge > ageGene.MaxAge)
+        {
+            Debug.Log("Born too old for this world");
+            Die(CauseOfDeath.Overcrowding);
+        }
     }
 }

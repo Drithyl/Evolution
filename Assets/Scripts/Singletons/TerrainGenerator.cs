@@ -76,20 +76,21 @@ public class TerrainGenerator : MonoBehaviour
         Debug.Log("Generating height map...");
         //HeightMap map = DiamondSquare.Generate(size, minCornerValue, maxCornerValue, roughness);
         HeightMap map = NoiseMap.Generate(width, height, xSeed, ySeed, scale);
-        WorldTerrain.SetHeightmap(map);
-
-
         map.Normalize();
-        Debug.Log("Time taken: " + (Time.realtimeSinceStartup - startTime) + "s");
+
+        //WorldTerrain.SetHeightmap(map);
+        WorldMap.Instance.InitializeHeightMap(map);
+
+        Debug.Log("World Land/Water Distribution: " + WorldMap.Instance.LandTileCount + "/" + WorldMap.Instance.WaterTileCount + " (" + WorldMap.Instance.LandTilePercent + "% Land)");
+        Debug.Log("World Shore/Inland Distribution: " + WorldMap.Instance.ShoreTileCount + "/" + WorldMap.Instance.InlandTileCount + " (" + WorldMap.Instance.ShoreTilePercent + "% Shore)");
+        Debug.Log("Time taken to initialize WorldMap: " + (Time.realtimeSinceStartup - startTime) + "s");
         //Debug.Log("Height map generated: " + map.ToString());
 
+        startTime = Time.realtimeSinceStartup;
         mesh = new TerrainMesh("TerrainMesh");
         mesh.SetMeshMaterial(material);
-
         mesh.GenerateMesh();
-
-        Debug.Log("World Land/Water Distribution: " + WorldTerrain.LandTilesNbr + "/" + WorldTerrain.WaterTilesNbr + " (" + WorldTerrain.LandTilePct + "% Land)");
-        Debug.Log("World Shore/Inland Distribution: " + WorldTerrain.ShoreTilesNbr + "/" + WorldTerrain.InlandTilesNbr + " (" + WorldTerrain.ShoreTilePct + "% Shore)");
+        Debug.Log("Time taken to generate world mesh: " + (Time.realtimeSinceStartup - startTime) + "s");
 
         if (debugVertices == true)
             mesh.DebugMeshVertices();
