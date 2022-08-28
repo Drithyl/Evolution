@@ -7,6 +7,7 @@ public class DataLineRenderer : MonoBehaviour
     public GameObject valueDisplayPrefab;
 
     public float thickness;
+    public Material material;
     public Color color;
     public float z = 0;
 
@@ -50,6 +51,7 @@ public class DataLineRenderer : MonoBehaviour
         float graphHeight = _drawingRect.height;
         float xSpacingBetweenPoints = _drawingRect.width / (dataPoints.Count - 1);
 
+        _lineRenderer.material = material;
         _lineRenderer.startColor = color;
         _lineRenderer.endColor = color;
         _lineRenderer.startWidth = thickness;

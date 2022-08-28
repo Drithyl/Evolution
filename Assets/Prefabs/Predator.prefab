@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2961299266337164982}
   - component: {fileID: 2961299266337164981}
   - component: {fileID: 2961299266337164980}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Status
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,8 @@ GameObject:
   - component: {fileID: 2961299266921261732}
   - component: {fileID: 2961299266921261739}
   - component: {fileID: 4233901835585039186}
-  m_Layer: 0
+  - component: {fileID: 4034423288435100065}
+  m_Layer: 3
   m_Name: Predator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -428,3 +429,17 @@ MonoBehaviour:
   _mouthfulNutrition: 0
   _isSeekingFood: 0
   _isHungry: 0
+--- !u!136 &4034423288435100065
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2961299266921261738}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}

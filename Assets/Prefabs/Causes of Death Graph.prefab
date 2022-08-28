@@ -744,8 +744,14 @@ MonoBehaviour:
   - {r: 0.8679245, g: 0.45102152, b: 0, a: 1}
   - {r: 0.4811321, g: 0, b: 0, a: 1}
   - {r: 0, g: 0, b: 0, a: 1}
+  defaultMaterials:
+  - {fileID: 2100000, guid: 8c82b5b393d28694e8641d5c69c188f9, type: 2}
+  - {fileID: 2100000, guid: 60c041b910de1f14ca38e6234f749e83, type: 2}
+  - {fileID: 2100000, guid: 3298003636b5875419d9c7cbea77d50a, type: 2}
+  - {fileID: 2100000, guid: 81f5c1f77a8729b4a92c1f3153b7c2d2, type: 2}
+  - {fileID: 2100000, guid: 1571d9719ef355f4ba4d54b6e2cd83bf, type: 2}
   graphLineThickness: 0.2
-  lineDepth: 1
+  lineDepth: 0.1
   lineGraphics: []
 --- !u!114 &1148086864961403007
 MonoBehaviour:

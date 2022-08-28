@@ -14,8 +14,11 @@ public class WindowGraph : MonoBehaviour
     [Tooltip("GameObject under which all data point objects will be contained.")]
     public Transform graphContainer;
 
-    [Tooltip("Default colours for each new data line added, if they don't have their own colour.")]
+    [Tooltip("Default colours for each new data line added, if they don't have their own.")]
     public Color[] defaultColors;
+
+    [Tooltip("Default materials for each new data line added, if they don't have their own.")]
+    public Material[] defaultMaterials;
 
     [Tooltip("Thickness of graph lines.")]
     [Range(0.1f, 1)]
@@ -48,12 +51,24 @@ public class WindowGraph : MonoBehaviour
         }
     }
 
+
+    private int nextMaterialIndex = 0;
+    private int NextMaterialIndex
+    {
+        get
+        {
+            int index = nextMaterialIndex;
+            nextMaterialIndex++;
+
+            if (nextMaterialIndex >= defaultMaterials.Length)
+                nextMaterialIndex = 0;
+
+            return index;
+        }
+    }
+
     private void Awake()
     {
-        /*List<float> valueList = new List<float>() { 5, 98, 56, 45, 30, 22, 17, 37, 36, 40, 36, 33 };
-        List<float> valueList2 = new List<float>() { 50, 73, 43, 41, 20, 7, 98, 76, 59, 46, 12, 21, 37, 20, 16, 93 };
-
-        AddDataLine(valueList, 3f);*/
 
     }
 
@@ -85,6 +100,7 @@ public class WindowGraph : MonoBehaviour
         dataLineGraphic.AddDataPoints(values);
         dataLineGraphic.thickness = thickness;
         dataLineGraphic.color = defaultColors[NextColorIndex];
+        dataLineGraphic.material = defaultMaterials[NextMaterialIndex];
 
         Rect rect = new Rect(
             graphContainer.position.x - graphContainer.localScale.x * 0.5f,
@@ -96,7 +112,7 @@ public class WindowGraph : MonoBehaviour
         Debug.Log("Drawing Rect: " + rect.ToString());
         dataLineGraphic.SetDrawingRect(rect);
 
-        dataLineGraphic.z = graphContainer.localPosition.z - lineDepth;
+        dataLineGraphic.z = graphContainer.position.z - lineDepth;
 
         lineGraphics.Add(dataLineGraphic);
         return dataLineGraphic;

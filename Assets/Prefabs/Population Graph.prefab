@@ -741,8 +741,11 @@ MonoBehaviour:
   defaultColors:
   - {r: 0.17275089, g: 0.6698113, b: 0, a: 1}
   - {r: 0.4811321, g: 0, b: 0, a: 1}
+  defaultMaterials:
+  - {fileID: 2100000, guid: 30e69fe123b5ca44b85b57fb263a6e1a, type: 2}
+  - {fileID: 2100000, guid: 81f5c1f77a8729b4a92c1f3153b7c2d2, type: 2}
   graphLineThickness: 0.2
-  lineDepth: 1
+  lineDepth: 0.1
   lineGraphics: []
 --- !u!114 &3016597834298250334
 MonoBehaviour:
