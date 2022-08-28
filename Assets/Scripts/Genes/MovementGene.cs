@@ -9,8 +9,9 @@ public class MovementGene : Gene
 
 
     [SerializeField]
-    private float _secondsToCompleteMove;
-    public float SecondsToCompleteMove { get { return _secondsToCompleteMove; } }
+    private float _turnRatioToCompleteMove;
+    public Vector2 TurnRatioToCompleteMoveRange { get; set; }
+    public float TurnRatioToCompleteMove { get { return _turnRatioToCompleteMove; } }
 
 
     [SerializeField]
@@ -46,31 +47,28 @@ public class MovementGene : Gene
     private void Update()
     {
         DebugExplorePath();
-        _secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
+        _turnRatioToCompleteMove = GameManager.Instance.TimeBetweenTurns;
     }
 
     public override void Randomize()
     {
-        //_secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns;
-        float percentOfGlobalTime = GameManager.Instance.TimeBetweenTurns * 0.15f;
-
-        _secondsToCompleteMove = GameManager.Instance.TimeBetweenTurns + Random.Range(-percentOfGlobalTime, percentOfGlobalTime);
+        _turnRatioToCompleteMove = GameManager.Instance.TimeBetweenTurns * Random.Range(TurnRatioToCompleteMoveRange.x, TurnRatioToCompleteMoveRange.y);
     }
 
     public override void Inherit(Gene inheritedGene)
     {
         MovementGene inheritedMovementGene = inheritedGene as MovementGene;
 
-        _secondsToCompleteMove = inheritedMovementGene.SecondsToCompleteMove;
+        _turnRatioToCompleteMove = inheritedMovementGene.TurnRatioToCompleteMove;
     }
 
     public override void PointMutate()
     {
-        float movementDurationMutatePercent = SecondsToCompleteMove * 0.1f;
+        float movementDurationMutatePercent = TurnRatioToCompleteMove * 0.1f;
 
         Debug.Log("Mutating movement duration by range: " + movementDurationMutatePercent);
 
-        _secondsToCompleteMove = Mathf.Max(1, SecondsToCompleteMove + Random.Range(-movementDurationMutatePercent, movementDurationMutatePercent));
+        _turnRatioToCompleteMove = Mathf.Max(1, TurnRatioToCompleteMove + Random.Range(-movementDurationMutatePercent, movementDurationMutatePercent));
     }
 
     public void SetMovePath(List<GridCoord> path)
@@ -164,7 +162,7 @@ public class MovementGene : Gene
 
         // For Lerping explanation, see answer marked as solution:
         // https://gamedev.stackexchange.com/questions/149103/why-use-time-deltatime-in-lerping-functions
-        moveProgress = Mathf.Clamp01(moveProgress + Time.deltaTime / SecondsToCompleteMove);
+        moveProgress = Mathf.Clamp01(moveProgress + Time.deltaTime / TurnRatioToCompleteMove);
         
         transform.position = Vector3.Lerp(
             transform.position,

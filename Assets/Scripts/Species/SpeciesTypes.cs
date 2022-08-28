@@ -1,5 +1,5 @@
 
-public enum Species
+public enum SpeciesTypes
 {
     Herbivore,
     Predator,

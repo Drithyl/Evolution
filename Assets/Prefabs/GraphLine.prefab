@@ -144,5 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c16863b163bb0d64d9cb1be2c8f221c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  valueDisplayPrefab: {fileID: 9067291064001288047, guid: c1b5096265ac83044863e717a6e708bd, type: 3}
   thickness: 3
   color: {r: 0, g: 0, b: 0, a: 0}
+  z: 0

@@ -38,32 +38,6 @@ public class Statistics : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
-    private int _landTilesSeen = 0;
-    public int LandTilesSeen
-    {
-        get { return _landTilesSeen; }
-        set
-        {
-            _landTilesSeen = value;
-            GlobalStatistics.Instance.MostLandTilesSeen = value;
-        }
-    }
-
-    [ReadOnly]
-    [SerializeField]
-    private int _waterTilesSeen = 0;
-    public int WaterTilesSeen
-    {
-        get { return _waterTilesSeen; }
-        set
-        {
-            _waterTilesSeen = value;
-            GlobalStatistics.Instance.MostWaterTilesSeen = value;
-        }
-    }
-
-    [ReadOnly]
-    [SerializeField]
     private int _foodConsumed = 0;
     public int FoodConsumed
     {
@@ -111,7 +85,6 @@ public class Statistics : MonoBehaviour
         {
             _offspringCreated = value;
             GlobalStatistics.Instance.TotalChildren++;
-            GlobalStatistics.Instance.MostOffspringCreatedAtOnce = value;
         }
     }
 

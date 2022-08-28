@@ -9,31 +9,39 @@ public class HungerGene : Gene
 
     [SerializeField]
     private int _maxHunger;
-    public int MaxHunger { get { return _maxHunger; } }
+    public Vector2Int MaxHungerRange { get; set; }
+    public int MaxHunger => _maxHunger;
 
 
     [SerializeField]
     private int _currentHunger;
-    public int CurrentHunger { get { return _currentHunger; } }
+    public int CurrentHunger => _currentHunger;
 
 
     [SerializeField]
     private float _mouthfulNutrition;
-    public float MouthfulNutrition { get { return _mouthfulNutrition; } }
+    public Vector2 MouthfulNutritionRange { get; set; }
+    public float MouthfulNutrition => _mouthfulNutrition;
 
 
     [SerializeField]
     private bool _isSeekingFood;
-    public bool IsSeekingFood { get { return _isSeekingFood; } }
+    public bool IsSeekingFood => _isSeekingFood;
 
-    public bool IsFull { get { return _currentHunger >= _maxHunger; } }
+
+    public bool IsFull => CurrentHunger >= MaxHunger;
+    public bool IsOverfilled => CurrentHunger > MaxHunger;
 
 
     [SerializeField]
     private bool _isHungry;
-    public bool IsHungry { get { return _isHungry; } }
-    public bool HasStarved { get { return _currentHunger <= 0; } }
+    public bool IsHungry => _isHungry;
+    public bool HasStarved => _currentHunger <= 0;
     override public float UrgeLevel => 1 - (CurrentHunger / (float)MaxHunger);
+
+
+    private WorldTile _targetFoodTile;
+    public WorldTile TargetFoodTile => _targetFoodTile;
 
 
     override public string Name { get { return "Hunger"; } }
@@ -74,6 +82,14 @@ public class HungerGene : Gene
             parent.Die(CauseOfDeath.Starvation);
     }
 
+    public void SetHungerAt(int amount)
+    {
+        _currentHunger = amount;
+
+        if (HasStarved == true)
+            parent.Die(CauseOfDeath.Starvation);
+    }
+
     public void SetHungerAtRatio(float ratio)
     {
         _currentHunger = Mathf.FloorToInt(MaxHunger * ratio);
@@ -84,8 +100,11 @@ public class HungerGene : Gene
 
     public override void Randomize()
     {
-        _maxHunger = Random.Range(10, 30);
-        _mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxHunger * 0.3f), Mathf.FloorToInt(_maxHunger * 0.5f));
+        _maxHunger = Random.Range(MaxHungerRange.x, MaxHungerRange.y + 1);
+        _mouthfulNutrition = Mathf.FloorToInt(MaxHunger * Random.Range(MouthfulNutritionRange.x, MouthfulNutritionRange.y));
+
+        //_maxHunger = Random.Range(10, 30);
+        //_mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxHunger * 0.3f), Mathf.FloorToInt(_maxHunger * 0.5f));
     }
 
     public override void Inherit(Gene inheritedGene)
@@ -108,16 +127,32 @@ public class HungerGene : Gene
         _mouthfulNutrition = Mathf.Max(1, MouthfulNutrition + Random.Range(-mouthfulNutritionMutatePercent, mouthfulNutritionMutatePercent));
     }
 
+    public bool CanStartEating()
+    {
+        if (_targetFoodTile.HasFood(parent.Diet) == false)
+            return false;
+
+        return GridCoord.AreAdjacent(parent.Position, TargetFoodTile.Coord);
+    }
+
     public void Eat()
     {
-        Food food = WorldMap.Instance.GetFoodAt(parent.Position, parent.FoodTypeNeeded);
+        Food food = WorldMap.Instance.GetFoodAt(TargetFoodTile.Coord, parent.Diet);
 
-        int missingNutrition = _maxHunger - _currentHunger;
+        if (food == null)
+        {
+            Debug.Log("No food left to eat in tile");
+            return;
+        }
+
         int nutritionMouthful = Mathf.FloorToInt(MouthfulNutrition);
-        int nutrition = food.Consume(Mathf.Min(nutritionMouthful, missingNutrition));
+        int nutritionObtained = food.Consume(nutritionMouthful);
 
-        _currentHunger += nutrition;
-        statistics.FoodConsumed += nutrition;
+        // Creatures can overdrink and overeat, which makes bigger
+        // mouthfuls potentially more advantageous
+        _currentHunger += nutritionObtained;
+
+        statistics.FoodConsumed += nutritionObtained;
         parent.SetStatusText("Eating");
 
         if (IsFull == true)
@@ -126,17 +161,37 @@ public class HungerGene : Gene
 
     public void SeekFood(PerceptionGene perceptionGene)
     {
+        Food food;
+        TerrainTypes terrainToSearch = TerrainTypes.Land;
         MovementGene movementGene = GetComponent<MovementGene>();
-        Food food = WorldMap.Instance.ClosestFoodInRadius(
+
+        // If it's plants, the tile we want to find should be
+        // empty, otherwise it can't be accessed by the creature
+        if (parent.Diet == FoodType.Plant)
+            terrainToSearch |= TerrainTypes.Empty;
+
+        food = WorldMap.Instance.ClosestFoodInRadius(
             parent.Position, 
             perceptionGene.DistanceInt,
-            parent.FoodTypeNeeded
+            parent.Diet,
+            terrainToSearch
         );
 
         if (food == null)
             return;
 
         _isSeekingFood = true;
+        _targetFoodTile = WorldMap.Instance.GetWorldTile(food.Position);
+
+
+        // If the food is already next to the creature; just eat
+        if (CanStartEating() == true)
+        {
+            Eat();
+            return;
+        }
+
+
         parent.SetStatusText("Moving to Food");
 
         if (movementGene != null)

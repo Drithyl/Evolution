@@ -14,6 +14,7 @@ public class ReproductionGene : Gene
 
     [SerializeField]
     private float _matingUrge = 0;
+    public Vector2 MatingUrgeRange { get; set; }
     public float MatingUrge { get { return _matingUrge; } }
 
 
@@ -24,6 +25,7 @@ public class ReproductionGene : Gene
 
     [SerializeField]
     private int _maxOffspring = 0;
+    public Vector2Int MaxOffspringRange { get; set; }
     public int MaxOffspring { get { return _maxOffspring; } }
 
 
@@ -34,11 +36,13 @@ public class ReproductionGene : Gene
 
     [SerializeField]
     private int _turnsToCompleteMating;
+    public Vector2Int TurnsToCompleteMatingRange { get; set; }
     public int TurnsToCompleteMating { get { return _turnsToCompleteMating; } }
 
 
     [SerializeField]
     private int _monthsOfPregnancy;
+    public Vector2Int MonthsOfPregnancyRange { get; set; }
     public int MonthsOfPregnancy { get { return _monthsOfPregnancy; } }
 
 
@@ -109,10 +113,14 @@ public class ReproductionGene : Gene
 
     public override void Randomize()
     {
-        _maxOffspring = Random.Range(1, 4);
-        _matingUrge = Random.Range(0.3f, 0.8f);
+        _maxOffspring = Random.Range(MaxOffspringRange.x, MaxOffspringRange.y + 1);
+        _matingUrge = Random.Range(MatingUrgeRange.x, MatingUrgeRange.y);
+        _turnsToCompleteMating = Random.Range(TurnsToCompleteMatingRange.x, TurnsToCompleteMatingRange.y + 1);
+        _monthsOfPregnancy = Random.Range(MonthsOfPregnancyRange.x, MonthsOfPregnancyRange.y + 1);
+
+        /*_matingUrge = Random.Range(0.3f, 0.8f);
         _turnsToCompleteMating = Random.Range(1, 3);
-        _monthsOfPregnancy = Random.Range(1, 5);
+        _monthsOfPregnancy = Random.Range(1, 5);*/
     }
 
     public override void Inherit(Gene inheritedGene)
@@ -195,7 +203,7 @@ public class ReproductionGene : Gene
         Creature closestMate = WorldMap.Instance.ClosestCreatureInRadius(
             parent.Position,
             perceptionGene.DistanceInt,
-            parent.Species,
+            parent.SpeciesType,
             Sex.OppositeSex(parent.SexType)
         );
 
@@ -306,7 +314,7 @@ public class ReproductionGene : Gene
         maternalGenome.right.CopyTo(inheritedGenome, paternalGenome.left.Length);
         //Debug.Log("Inherited genome: " + inheritedGenome.Length);
 
-        Creature offspring = CreatureSpawner.Instance.Spawn(parent.Species, emptyTile.Coord);
+        Creature offspring = CreatureSpawner.Instance.Spawn(parent.SpeciesType, emptyTile.Coord);
         offspring.CompleteBirthProcess(inheritedGenome, pregnancyProgress, _targetMateStatistics, statistics);
 
         if (TargetMate == null)

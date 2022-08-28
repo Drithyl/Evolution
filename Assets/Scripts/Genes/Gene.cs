@@ -9,5 +9,15 @@ abstract public class Gene : MonoBehaviour
     abstract public void Randomize();
     abstract public void Inherit(Gene gene);
     abstract public void PointMutate();
+
+
+    private void Start()
+    {
+        GeneStatistics.Instance.AddGene(GetComponent<Creature>(), this);
+    }
+    private void OnDestroy()
+    {
+        GeneStatistics.Instance.RemoveGene(GetComponent<Creature>(), this);
+    }
 }
 

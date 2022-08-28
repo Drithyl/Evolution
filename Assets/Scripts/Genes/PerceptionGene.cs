@@ -10,6 +10,7 @@ public class PerceptionGene : Gene
     private float _distance;
 
     public float Distance { get { return _distance; } }
+    public Vector2Int DistanceRange { get; set; }
     public int DistanceInt { get { return Mathf.FloorToInt(Distance); } }
 
 
@@ -24,7 +25,8 @@ public class PerceptionGene : Gene
 
     public override void Randomize()
     {
-        _distance = Random.Range(5f, 7f);
+        _distance = Random.Range(DistanceRange.x, DistanceRange.y + 1);
+        //_distance = Random.Range(5f, 7f);
     }
 
     public override void Inherit(Gene inheritedGene)

@@ -29,7 +29,7 @@ public class PlantFood : Food
     override public GridCoord Position { get { return _position; } set { _position = value; } }
 
 
-    override public void Initialize(GridCoord foodPosition)
+    public void Initialize(GridCoord foodPosition)
     {
         maxAmount = Random.Range(5, 15);
         amount = maxAmount;

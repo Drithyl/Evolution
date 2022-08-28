@@ -10,7 +10,7 @@ public class CreatureSpawner : MonoBehaviour
 
 
     [Header("Spawn Creature Through Inspector")]
-    public Species speciesToSpawn;
+    public SpeciesTypes speciesToSpawn;
     public int x;
     public int y;
 
@@ -41,12 +41,12 @@ public class CreatureSpawner : MonoBehaviour
         y = coord.Y;
     }
 
-    public Creature Spawn(Species species, GridCoord coord)
+    public Creature Spawn(SpeciesTypes species, GridCoord coord)
     {
         return Spawn(species, coord.X, coord.Y);
     }
 
-    public Creature Spawn(Species species, int x, int y)
+    public Creature Spawn(SpeciesTypes species, int x, int y)
     {
         //Debug.Log("Spawning creature of species " + species.ToString() + " (" + (int)species + ")");
         WorldTile tile = WorldMap.Instance.GetWorldTile(x, y);
@@ -58,7 +58,7 @@ public class CreatureSpawner : MonoBehaviour
 
         GameObject creature = Instantiate(creaturePrefabs[(int)species], transform);
         Creature creatureScript = creature.GetComponent<Creature>();
-        creatureScript.Initialize(new GridCoord(x, y), species, FoodType.Plant);
+        creatureScript.Initialize(new GridCoord(x, y));
         GameManager.Instance.AddCreature(creatureScript);
         return creatureScript;
     }

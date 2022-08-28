@@ -32,26 +32,6 @@ public class GlobalStatistics : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
-    private int _mostLandTilesSeen;
-    public int MostLandTilesSeen
-    {
-        get { return _mostLandTilesSeen; }
-        set { _mostLandTilesSeen = Mathf.Max(MostLandTilesSeen, value); }
-    }
-
-
-    [ReadOnly]
-    [SerializeField]
-    private int _mostWaterTilesSeen;
-    public int MostWaterTilesSeen
-    {
-        get { return _mostWaterTilesSeen; }
-        set { _mostWaterTilesSeen = Mathf.Max(MostWaterTilesSeen, value); }
-    }
-
-
-    [ReadOnly]
-    [SerializeField]
     private int _mostFoodConsumed;
     public int MostFoodConsumed
     {
@@ -82,21 +62,11 @@ public class GlobalStatistics : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
-    private int _mostOffspringCreatedAtOnce;
-    public int MostOffspringCreatedAtOnce
+    private int _totalCreaturesLived;
+    public int TotalCreaturesLived
     {
-        get { return _mostOffspringCreatedAtOnce; }
-        set { _mostOffspringCreatedAtOnce = Mathf.Max(MostOffspringCreatedAtOnce, value); }
-    }
-
-
-    [ReadOnly]
-    [SerializeField]
-    private int _totalMembers;
-    public int TotalMembers
-    {
-        get { return _totalMembers; }
-        set { _totalMembers = value; }
+        get { return _totalCreaturesLived; }
+        set { _totalCreaturesLived = value; }
     }
 
 
@@ -138,19 +108,12 @@ public class GlobalStatistics : MonoBehaviour
     public string MostCommonCauseOfDeath { get { return _mostCommonCauseOfDeath; } }
 
 
-    public WindowGraph[] graphs;
-    public DataLineRenderer[] graphLines;
-
 
     private void Awake()
     {
         EnsureSingleton();
         Array deathTypes = Enum.GetValues(typeof(CauseOfDeath));
         causeOfDeathCounters = new int[deathTypes.Length];
-        graphLines = new DataLineRenderer[]
-        {
-            graphs[0].AddDataLineGraphic(0.2f)
-        };
     }
 
     private void OnValidate()
@@ -158,9 +121,14 @@ public class GlobalStatistics : MonoBehaviour
         EnsureSingleton();
     }
 
-    public void UpdateMonthlyStatistics()
+    private void OnEnable()
     {
-        graphLines[0].AddDataPoint(GameManager.Instance.NumberOfCreatures);
+        GameManager.Instance.OnMonthPassed += OnMonthPassedHandler;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance.OnMonthPassed -= OnMonthPassedHandler;
     }
 
     public void RecordCreatureStatistics(Statistics statistics)
@@ -170,6 +138,16 @@ public class GlobalStatistics : MonoBehaviour
         causeOfDeathCounters[(int)statistics.DeathCausedBy]++;
 
         UpdateMostCommonCauseOfDeath();
+    }
+
+    public int GetCauseOfDeathCount(CauseOfDeath causeOfDeath)
+    {
+        return causeOfDeathCounters[(int)causeOfDeath];
+    }
+
+    private void OnMonthPassedHandler(object sender, MonthPassedArgs args)
+    {
+        // Count turns and months?
     }
 
     private void UpdateMostCommonCauseOfDeath()

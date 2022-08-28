@@ -1,10 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
     static public GameManager Instance { get; private set; }
+
+    // EVENTS
+    public event EventManager.TurnPassed OnTurnPassed = delegate { };
+    public event EventManager.MonthPassed OnMonthPassed = delegate { };
 
     [ReadOnly]
     public bool headlessMode = false;
@@ -41,10 +46,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int foodDecayPerMonth = -1;
 
-    [Tooltip("Number of starting creatures in the world.")]
-    [Range(0, 100)]
+    [Tooltip("Number of starting creatures in the world of each species.")]
     [SerializeField]
-    private int numOfStartingCreatures = 30;
+    private int[] startingCreatures = new int[] { 30, 4 };
 
     [Tooltip("Pauses the time when there are no creatures left.")]
     [SerializeField]
@@ -56,14 +60,25 @@ public class GameManager : MonoBehaviour
 
     [ReadOnly]
     [SerializeField]
+    private int _turnNumber;
+
+    [ReadOnly]
+    [SerializeField]
     private int _nextMonthCounter;
 
+    [ReadOnly]
+    [SerializeField]
+    private int _monthNumber;
+
+    [ReadOnly]
+    [SerializeField]
+    private int[] _numOfLivingCreatures = new int[2];
+
+
     private List<Creature> creatures = new List<Creature>();
-    public int NumberOfCreatures { get { return creatures.Count; } }
-
-
     private List<PlantFood> foodSupply = new List<PlantFood>();
-    public int NumberOfFood { get { return foodSupply.Count; } }
+
+    public int NumberOfFood => foodSupply.Count;
 
 
     private bool _isNewTurn;
@@ -90,14 +105,52 @@ public class GameManager : MonoBehaviour
         WorldPositions.SquareSpeedTest(Mathf.FloorToInt(WorldMap.Instance.Width * 0.5f), Mathf.FloorToInt(WorldMap.Instance.Height), Mathf.FloorToInt(WorldMap.Instance.Width * 0.2f));
         Debug.Log("Square time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");*/
 
-        for (int i = 0; i < numOfStartingCreatures; i++)
+        for (int speciesIndex = 0; speciesIndex < startingCreatures.GetLength(0); speciesIndex++)
         {
-            CreatureSpawner.Instance.Spawn(
-                CreatureSpawner.Instance.speciesToSpawn,
-                CreatureSpawner.Instance.x,
-                CreatureSpawner.Instance.y
-            );
+            int numToSpawn = startingCreatures[speciesIndex];
+
+            for (int i = 0; i < numToSpawn; i++)
+            {
+                SpeciesTypes[] species = Enum.GetValues(typeof(SpeciesTypes)) as SpeciesTypes[];
+                SpeciesTypes speciesToSpawn = species[speciesIndex];
+
+                CreatureSpawner.Instance.Spawn(
+                    speciesToSpawn,
+                    CreatureSpawner.Instance.x,
+                    CreatureSpawner.Instance.y
+                );
+            }
         }
+    }
+
+    public (float maxHunger, float mouthfulNutrition) AverageHungerGeneValues()
+    {
+        float maxHungerTotal = 0;
+        int maxHungerValues = 0;
+
+        float mouthfulTotal = 0;
+        int mouthfulValues = 0;
+
+        foreach (Creature creature in creatures)
+        {
+            HungerGene hunger = creature.GetComponent<HungerGene>();
+
+            if (hunger == null)
+                continue;
+
+            maxHungerTotal += hunger.MaxHunger;
+            maxHungerValues++;
+
+            mouthfulTotal += hunger.MouthfulNutrition;
+            mouthfulValues++;
+        }
+
+        return (maxHungerTotal / maxHungerValues, mouthfulTotal / mouthfulValues);
+    }
+
+    public int GetNumberOfLivingCreatures(SpeciesTypes species)
+    {
+        return _numOfLivingCreatures[(int)species];
     }
 
     private void OnValidate()
@@ -115,11 +168,17 @@ public class GameManager : MonoBehaviour
         _isNewTurn = CheckIfNewTurn();
         _isNewMonth = CheckIfNewMonth();
 
+        if (IsNewTurn == true)
+        {
+            EmitNewTurnEvent();
+        }
+
         if (IsNewMonth == true)
         {
+            EmitNewMonthEvent();
+
             GrowFood();
             SpreadFood(chanceOfFoodToSpawn);
-            GlobalStatistics.Instance.UpdateMonthlyStatistics();
         }
 
         // Reverse loop so creatures can be removed from the list
@@ -146,6 +205,7 @@ public class GameManager : MonoBehaviour
         {
             _time -= _timeBetweenTurns;
             _nextMonthCounter++;
+            _turnNumber++;
         }
 
         return isNewTurn;
@@ -156,10 +216,28 @@ public class GameManager : MonoBehaviour
         bool isNewMonth = _nextMonthCounter >= turnsBetweenMonths == true;
 
         if (isNewMonth == true)
+        {
             _nextMonthCounter = 0;
+            _monthNumber++;
+        }
 
         return isNewMonth;
     }
+
+    private void EmitNewTurnEvent()
+    {
+        TurnPassedArgs args = new TurnPassedArgs();
+        args.TurnNumber = _turnNumber;
+        OnTurnPassed?.Invoke(this, args);
+    }
+
+    private void EmitNewMonthEvent()
+    {
+        MonthPassedArgs args = new MonthPassedArgs();
+        args.MonthNumber = _monthNumber;
+        OnMonthPassed?.Invoke(this, args);
+    }
+
 
     private void UpdateCreature(Creature creature)
     {
@@ -175,6 +253,7 @@ public class GameManager : MonoBehaviour
         if (IsNewTurn == true)
             GeneManager.Instance.UpdateImpulse(creature);
     }
+
 
     private void GrowFood()
     {
@@ -192,29 +271,34 @@ public class GameManager : MonoBehaviour
         PlantSpawner.Instance.SpawnPlant(chance, startFoodOnNewGrowth);
     }
 
+
+    public void AddPlantFoodToSupply(PlantFood food)
+    {
+        foodSupply.Add(food);
+        WorldMap.Instance.SetPlantFoodPosition(food, food.Position);
+    }
+
+    public void RemoveFoodFromSupply(PlantFood food)
+    {
+        foodSupply.Remove(food);
+        WorldMap.Instance.RemovePlantFoodFromPosition(food.Position);
+    }
+
+
     public void AddCreature(Creature creature)
     {
         creatures.Add(creature);
         WorldMap.Instance.SetCreaturePosition(creature, creature.Position);
+        _numOfLivingCreatures[(int)creature.SpeciesType]++;
     }
 
     public void RemoveCreature(Creature creature)
     {
         creatures.Remove(creature);
         WorldMap.Instance.RemoveCreatureFromPosition( creature.Position);
+        _numOfLivingCreatures[(int)creature.SpeciesType]--;
     }
 
-    public void AddPlantFoodToSupply(PlantFood food)
-    {
-        foodSupply.Add(food);
-        WorldMap.Instance.SetFoodPosition(food, food.Position);
-    }
-
-    public void RemoveFoodFromSupply(PlantFood food)
-    {
-        foodSupply.Remove(food);
-        WorldMap.Instance.RemoveFoodFromPosition(food, food.Position);
-    }
 
     private void EnsureSingleton()
     {

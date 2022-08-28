@@ -9,6 +9,7 @@ public class ThirstGene : Gene
 
     [SerializeField]
     private int _maxThirst;
+    public Vector2Int MaxThirstRange { get; set; }
     public int MaxThirst { get { return _maxThirst; } }
 
 
@@ -19,6 +20,7 @@ public class ThirstGene : Gene
 
     [SerializeField]
     private float _mouthfulNutrition;
+    public Vector2 MouthfulNutritionRange { get; set; }
     public float MouthfulNutrition { get { return _mouthfulNutrition; } }
 
 
@@ -27,7 +29,8 @@ public class ThirstGene : Gene
     public bool IsSeekingWater { get { return _isSeekingWater; } }
 
 
-    public bool IsFull { get { return _currentThirst >= _maxThirst; } }
+    public bool IsFull { get { return CurrentThirst >= MaxThirst; } }
+    public bool IsOverfilled { get { return CurrentThirst > MaxThirst; } }
 
 
     [SerializeField]
@@ -78,8 +81,11 @@ public class ThirstGene : Gene
 
     public override void Randomize()
     {
-        _maxThirst = Random.Range(10, 30);
-        _mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxThirst * 0.3f), Mathf.FloorToInt(_maxThirst * 0.5f));
+        _maxThirst = Random.Range(MaxThirstRange.x, MaxThirstRange.y + 1);
+        _mouthfulNutrition = Mathf.FloorToInt(MaxThirst * Random.Range(MouthfulNutritionRange.x, MouthfulNutritionRange.y));
+
+        //_maxThirst = Random.Range(10, 30);
+        //_mouthfulNutrition = Random.Range(Mathf.FloorToInt(_maxThirst * 0.3f), Mathf.FloorToInt(_maxThirst * 0.5f));
     }
 
     public override void Inherit(Gene inheritedGene)
@@ -104,9 +110,12 @@ public class ThirstGene : Gene
 
     public void Drink()
     {
-        int waterDrunk = Mathf.Min(MaxThirst - CurrentThirst, Mathf.FloorToInt(MouthfulNutrition));
+        int waterDrunk = Mathf.FloorToInt(MouthfulNutrition);
 
+        // Creatures can overdrink and overeat, which makes bigger
+        // mouthfuls potentially more advantageous
         _currentThirst += waterDrunk;
+
         statistics.WaterDrunk += waterDrunk;
         parent.SetStatusText("Drinking");
 

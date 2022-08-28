@@ -16,6 +16,26 @@ public class GeneManager : MonoBehaviour
         EnsureSingleton();
     }
 
+    private void OnEnable()
+    {
+        GameManager.Instance.OnMonthPassed += OnMonthPassedHandler;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance.OnMonthPassed -= OnMonthPassedHandler;
+    }
+
+    private void OnMonthPassedHandler(object sender, MonthPassedArgs args)
+    {
+        GeneStatistics.Instance.AverageAgeValues();
+        GeneStatistics.Instance.AverageHungerValues();
+        GeneStatistics.Instance.AverageMovementValues();
+        GeneStatistics.Instance.AveragePerceptionbValues();
+        GeneStatistics.Instance.AverageReproductionValues();
+        GeneStatistics.Instance.AverageThirstValues();
+    }
+
     public void UpdateImpulse(Creature creature)
     {
         ThirstGene thirstGene = creature.GetComponent<ThirstGene>();
@@ -58,7 +78,7 @@ public class GeneManager : MonoBehaviour
             return;
         }
 
-        if (hungerGene != null && hungerGene.IsSeekingFood == true && WorldMap.Instance.HasFoodAt(creature.Position, creature.FoodTypeNeeded) == true)
+        if (hungerGene != null && hungerGene.IsSeekingFood == true && hungerGene.CanStartEating() == true)
         {
             hungerGene.Eat();
             return;
@@ -70,7 +90,8 @@ public class GeneManager : MonoBehaviour
 
         if (mostUrgentImpulse.UrgeLevel > 0)
         {
-            //Debug.Log("Most urgent impulse: " + mostUrgentImpulse.ToString() + " at " + mostUrgentImpulse.UrgeLevel);
+            /*if (creature.SpeciesType == SpeciesTypes.Predator)
+                Debug.Log("Most urgent impulse: " + mostUrgentImpulse.ToString() + " at " + mostUrgentImpulse.UrgeLevel);*/
             
             if (mostUrgentImpulse == reproductionGene)
             {

@@ -35,12 +35,12 @@ public class Creature : MonoBehaviour
     
     private Statistics statistics;
 
-    protected FoodType _foodTypeNeeded;
-    public FoodType FoodTypeNeeded => _foodTypeNeeded;
+    protected FoodType _diet;
+    public FoodType Diet => _diet;
 
 
-    protected Species _species;
-    public Species Species => _species;
+    protected SpeciesTypes _species;
+    public SpeciesTypes SpeciesType => _species;
 
 
     protected Sex.Types _sex;
@@ -57,7 +57,7 @@ public class Creature : MonoBehaviour
         _id = Creature.nextId;
         statistics.id = Id;
         Creature.nextId++;
-        GlobalStatistics.Instance.TotalMembers++;
+        GlobalStatistics.Instance.TotalCreaturesLived++;
 
         name = "Creature (" + Id + ")";
     }
@@ -67,11 +67,9 @@ public class Creature : MonoBehaviour
         GameManager.Instance.RemoveCreature(this);
     }
 
-    public void Initialize(GridCoord position, Species species, FoodType foodTypeNeeded)
+    public void Initialize(GridCoord position)
     {
         _position = position;
-        _species = species;
-        _foodTypeNeeded = foodTypeNeeded;
         transform.position = WorldMap.Instance.GetWorldTile(Position).Centre;
 
 
@@ -88,6 +86,16 @@ public class Creature : MonoBehaviour
         }
 
         statistics.sex = _sex;
+    }
+
+    public void SetSpecies(SpeciesTypes species)
+    {
+        _species = species;
+    }
+
+    public void SetDiet(FoodType diet)
+    {
+        _diet = diet;
     }
 
     public void SetStatusText(string statusText)

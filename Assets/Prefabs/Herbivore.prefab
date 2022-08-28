@@ -13,12 +13,14 @@ GameObject:
   - component: {fileID: 4238137894254285132}
   - component: {fileID: -6824755135150892927}
   - component: {fileID: 8360193851118204375}
+  - component: {fileID: 8718052059015525547}
   - component: {fileID: -371922515176959452}
   - component: {fileID: 2455918836292775391}
   - component: {fileID: -1489980883524175487}
   - component: {fileID: -863317858327892833}
   - component: {fileID: -1046794670956909613}
   - component: {fileID: 844514888118729459}
+  - component: {fileID: 4668759484284068143}
   m_Layer: 0
   m_Name: Herbivore
   m_TagString: Untagged
@@ -107,8 +109,8 @@ MonoBehaviour:
   femaleMaterial: {fileID: 2100000, guid: fc51313f927263b459b1f702df8ce43b, type: 2}
   maleMaterial: {fileID: 2100000, guid: 79877813337fd784eadb78d8e0bb57a7, type: 2}
   statusTextMesh: {fileID: 4524854845656292677}
+  scaleProgression: {x: 0.1, y: 0.5}
   _id: 0
-  _isFemale: 0
   _isDying: 0
 --- !u!114 &8360193851118204375
 MonoBehaviour:
@@ -123,17 +125,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 0
-  isFemale: 0
+  sex: 0
   _generation: 0
   _tilesTraveled: 0
-  _landTilesSeen: 0
-  _waterTilesSeen: 0
   _foodConsumed: 0
   _waterDrunk: 0
   _monthsLived: 0
   _offspringCreated: 0
   _deathCausedBy: 0
   descendants: []
+--- !u!114 &8718052059015525547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974381062715291377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c21004eef911ac748abc9eac48b9869c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  diet: 0
+  speciesType: 0
+  maxAgeRange: {x: 20, y: 30}
+  maturityAgeRange: {x: 0.1, y: 0.2}
+  maxHungerRange: {x: 10, y: 20}
+  foodMouthfulRange: {x: 0.2, y: 0.4}
+  turnRatioToCompleteMoveRange: {x: 0.75, y: 1.25}
+  perceptionRadiusRange: {x: 4, y: 6}
+  maxOffspringRange: {x: 1, y: 3}
+  matingUrgeRange: {x: 0.3, y: 0.8}
+  turnsToCompleteMatingRange: {x: 1, y: 3}
+  monthsOfPregnancyRange: {x: 1, y: 5}
+  maxThirstRange: {x: 10, y: 20}
+  waterMouthfulRange: {x: 0.2, y: 0.4}
 --- !u!114 &-371922515176959452
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,13 +209,6 @@ MonoBehaviour:
   _maxAge: 0
   _maturityAge: 0
   _currentAge: 0
-  _matingUrge: 0
-  _currentMatingUrge: 0
-  _maxOffspring: 0
-  _secondsToCompleteMating: 0
-  matingProgress: 0
-  _isMating: 0
-  _alreadyMated: 0
 --- !u!114 &-863317858327892833
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,7 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9822c46883f27c24db70ee3ae532b61e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _secondsToCompleteMove: 0
+  _turnRatioToCompleteMove: 0
   moveProgress: 0
   _isMoving: 0
 --- !u!114 &-1046794670956909613
@@ -228,6 +247,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f6a47c1bae73f7f4f80dfb653041ea34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _matingUrge: 0
+  _currentMatingUrge: 0
+  _maxOffspring: 0
+  _offspringLeftToSpawn: 0
+  _turnsToCompleteMating: 0
+  _monthsOfPregnancy: 0
+  pregnancyProgress: 0
+  _isPregnant: 0
+--- !u!114 &4668759484284068143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1974381062715291377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c9dca23c510e0b4480b9162dcabbcc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8600913409972993128

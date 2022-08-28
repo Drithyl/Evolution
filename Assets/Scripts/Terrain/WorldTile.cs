@@ -3,51 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-/*public struct WorldTile
-{
-    public GridCoord gridPosition;
-    public float heightMapValue;
-
-    public List<Food> foodsOnTile;
-    public Creature creatureOnTile;
-
-    public bool isLand;
-    public bool isWater;
-    public bool isShore;
-    public bool isEdge;
-
-    public Vector3 nw;
-    public Vector3 ne;
-    public Vector3 se;
-    public Vector3 sw;
-    public Vector3 tileCentre;
-
-
-    public int X => gridPosition.X;
-    public int Y => gridPosition.Y;
-
-
-    public WorldTile(int x, int y, float heightValue)
-    {
-        gridPosition = new GridCoord(x, y);
-        heightMapValue = heightValue;
-
-        foodsOnTile = new List<Food>();
-        creatureOnTile = null;
-
-        isLand = false;
-        isWater = false;
-        isShore = false;
-        isEdge = false;
-
-        nw = new Vector3();
-        ne = new Vector3();
-        se = new Vector3();
-        sw = new Vector3();
-        tileCentre = new Vector3();
-    }
-}*/
-
 public class WorldTile
 {
     private GridCoord coord;
@@ -55,7 +10,7 @@ public class WorldTile
     private TerrainTypes types = TerrainTypes.Empty;
 
 
-    private List<Food> foodsOnTile = new List<Food>();
+    private PlantFood plantFoodOnTile = null;
     private Creature creatureOnTile = null;
 
 
@@ -76,19 +31,7 @@ public class WorldTile
     //public bool IsWalkable => types.HasFlag(TerrainTypes.Land) == true && HasCreature() == false;
 
 
-    public bool IsWalkable
-    {
-        get
-        {
-            if (types.HasFlag(TerrainTypes.Land) == false)
-                Debug.Log("Not a land tile?! " + types);
-
-            if (HasCreature() == true)
-                Debug.Log("Already has creature!!!!");
-
-            return types.HasFlag(TerrainTypes.Land) == true && HasCreature() == false;
-        }
-    }
+    public bool IsWalkable => types.HasFlag(TerrainTypes.Land) == true && HasCreature() == false;
 
 
     public Vector3 NW => nw;
@@ -133,17 +76,28 @@ public class WorldTile
     }
 
 
-    public void AddFood(Food food)
+    public void AddPlantFood(PlantFood food)
     {
-        if (HasFood(food.FoodType) == true)
-            throw new Exception("Cannot add food of type " + food.FoodType.ToString() + " on tile " + coord.ToString() + "; a food of the same type already exists");
+        if (plantFoodOnTile != null)
+            throw new Exception("Cannot add plant food on tile " + coord.ToString() + "; a plant food already exists");
 
-        foodsOnTile.Add(food);
+        plantFoodOnTile = food;
     }
 
     public Food GetFood(FoodType type)
     {
-        return foodsOnTile.Find(x => x.FoodType == type);
+        if (type == FoodType.Plant)
+            return plantFoodOnTile;
+
+        if (type == FoodType.Meat)
+        {
+            if (creatureOnTile == null)
+                return null;
+
+            return creatureOnTile.GetComponent<MeatFood>();
+        }
+
+        else return null;
     }
 
     public bool HasFood(FoodType type)
@@ -151,12 +105,9 @@ public class WorldTile
         return GetFood(type) != null;
     }
 
-    public void RemoveFood(FoodType type)
+    public void RemovePlantFood()
     {
-        int index = foodsOnTile.FindIndex(x => x.FoodType == type);
-
-        if (index >= 0)
-            foodsOnTile.RemoveAt(index);
+        plantFoodOnTile = null;
     }
 
 
@@ -172,21 +123,21 @@ public class WorldTile
         types = types & ~TerrainTypes.Empty;
     }
 
-    public Creature GetCreature(Species species = Species.Any)
+    public Creature GetCreature(SpeciesTypes species = SpeciesTypes.Any)
     {
         if (creatureOnTile == null)
             return null;
 
-        if (species == Species.Any)
+        if (species == SpeciesTypes.Any)
             return creatureOnTile;
 
-        if (species != creatureOnTile.Species)
+        if (species != creatureOnTile.SpeciesType)
             return null;
 
         return creatureOnTile;
     }
 
-    public bool HasCreature(Species species = Species.Any)
+    public bool HasCreature(SpeciesTypes species = SpeciesTypes.Any)
     {
         return GetCreature(species) != null;
     }

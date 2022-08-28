@@ -10,18 +10,15 @@ public class MeatFood : Food
     public override FoodType FoodType => FoodType.Meat;
     override public GridCoord Position { get { return creature.Position; } set { creature.Position = value; } }
 
-
-    override public void Initialize(GridCoord foodPosition)
+    private void Awake()
     {
         creature = GetComponent<Creature>();
         hungerGene = GetComponent<HungerGene>();
-
-        //GameManager.Instance.AddFoodToSupply(this);
     }
 
     private void OnDestroy()
     {
-        //GameManager.Instance.RemoveFoodFromSupply(this);
+
     }
 
     public override void Add(int growth)
@@ -34,10 +31,14 @@ public class MeatFood : Food
         int amountLeft = hungerGene.GetNutritionalValue();
         int consumed = Mathf.Min(amountLeft, amountToConsume);
 
-        amountLeft -= amountToConsume;
+        amountLeft -= consumed;
+
 
         if (amountLeft <= 0)
             creature.Die(CauseOfDeath.Devoured);
+
+        else hungerGene.SetHungerAt(amountLeft);
+
 
         return consumed;
     }

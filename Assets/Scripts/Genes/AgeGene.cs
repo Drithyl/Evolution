@@ -10,11 +10,13 @@ public class AgeGene : Gene
 
     [SerializeField]
     private int _maxAge;
+    public Vector2Int MaxAgeRange { get; set; }
     public int MaxAge { get { return _maxAge; } }
 
 
     [SerializeField]
     private int _maturityAge;
+    public Vector2 MaturityAgeRange { get; set; }
     public int MaturityAge { get { return _maturityAge; } }
 
 
@@ -53,8 +55,11 @@ public class AgeGene : Gene
 
     public override void Randomize()
     {
-        _maxAge = Random.Range(20, 30);
-        _maturityAge = Mathf.FloorToInt(_maxAge * Random.Range(0.1f, 0.2f));
+        _maxAge = Random.Range(MaxAgeRange.x, MaxAgeRange.y + 1);
+        _maturityAge = Mathf.FloorToInt(_maxAge * Random.Range(MaturityAgeRange.x, MaturityAgeRange.y));
+
+        //_maxAge = Random.Range(20, 30);
+        //_maturityAge = Mathf.FloorToInt(_maxAge * Random.Range(0.1f, 0.2f));
     }
 
     public override void Inherit(Gene inheritedGene)

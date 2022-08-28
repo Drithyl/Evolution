@@ -93,16 +93,16 @@ public class WorldMap
     }
 
 
-    public void SetFoodPosition(Food food, GridCoord tile)
+    public void SetPlantFoodPosition(PlantFood food, GridCoord tile)
     {
-        RemoveFoodFromPosition(food, food.Position);
-        GetWorldTile(tile).AddFood(food);
+        RemovePlantFoodFromPosition(food.Position);
+        GetWorldTile(tile).AddPlantFood(food);
         food.Position = tile;
     }
 
-    public void RemoveFoodFromPosition(Food food, GridCoord tile)
+    public void RemovePlantFoodFromPosition(GridCoord tile)
     {
-        GetWorldTile(tile).RemoveFood(food.FoodType);
+        GetWorldTile(tile).RemovePlantFood();
     }
 
     public bool HasFoodAt(GridCoord tile, FoodType foodType)
@@ -249,7 +249,7 @@ public class WorldMap
 
 
 
-    public Creature ClosestCreatureInRadius(int x, int y, int radius, Species species = Species.Any, Sex.Types sex = Sex.Types.Any)
+    public Creature ClosestCreatureInRadius(int x, int y, int radius, SpeciesTypes species = SpeciesTypes.Any, Sex.Types sex = Sex.Types.Any)
     {
         IEnumerable<WorldTile> spiralPattern =
             EnumerablePatterns.SpiralFromWithRadius(
@@ -260,7 +260,13 @@ public class WorldMap
         {
             Creature creature = tile.GetCreature(species);
 
+            if (tile.Coord == new GridCoord(x, y))
+                continue;
+
             if (creature == null)
+                continue;
+
+            if (species != SpeciesTypes.Any && creature.SpeciesType != species)
                 continue;
 
             if (sex != Sex.Types.Any && creature.SexType != sex)
@@ -272,7 +278,7 @@ public class WorldMap
         return null;
     }
 
-    public Creature ClosestCreatureInRadius(GridCoord coord, int radius, Species species, Sex.Types sex)
+    public Creature ClosestCreatureInRadius(GridCoord coord, int radius, SpeciesTypes species, Sex.Types sex)
     {
         return ClosestCreatureInRadius(coord.X, coord.Y, radius, species, sex);
     }
@@ -288,6 +294,9 @@ public class WorldMap
 
         foreach (WorldTile tile in spiralPattern)
         {
+            if (tile.Coord == new GridCoord(x, y))
+                continue;
+
             if (tile.Types.HasFlag(terrainTypes) == false)
                 continue;
 
@@ -318,6 +327,9 @@ public class WorldMap
 
         foreach (WorldTile tile in spiralPattern)
         {
+            if (tile.Coord == new GridCoord(x, y))
+                continue;
+
             if (tile.Types.HasFlag(terrainTypes) == false)
                 continue;
 
