@@ -123,31 +123,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public (float maxHunger, float mouthfulNutrition) AverageHungerGeneValues()
-    {
-        float maxHungerTotal = 0;
-        int maxHungerValues = 0;
-
-        float mouthfulTotal = 0;
-        int mouthfulValues = 0;
-
-        foreach (Creature creature in creatures)
-        {
-            HungerGene hunger = creature.GetComponent<HungerGene>();
-
-            if (hunger == null)
-                continue;
-
-            maxHungerTotal += hunger.MaxHunger;
-            maxHungerValues++;
-
-            mouthfulTotal += hunger.MouthfulNutrition;
-            mouthfulValues++;
-        }
-
-        return (maxHungerTotal / maxHungerValues, mouthfulTotal / mouthfulValues);
-    }
-
     public int GetNumberOfLivingCreatures(SpeciesTypes species)
     {
         return _numOfLivingCreatures[(int)species];

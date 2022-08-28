@@ -58,8 +58,6 @@ public class Creature : MonoBehaviour
         statistics.id = Id;
         Creature.nextId++;
         GlobalStatistics.Instance.TotalCreaturesLived++;
-
-        name = "Creature (" + Id + ")";
     }
 
     private void OnDestroy()
@@ -70,7 +68,8 @@ public class Creature : MonoBehaviour
     public void Initialize(GridCoord position)
     {
         _position = position;
-        transform.position = WorldMap.Instance.GetWorldTile(Position).Centre;
+        transform.position = WorldMap.Instance.GetWorldTile(Position).Centre + 
+            (Vector3.up * transform.localScale.y * 0.5f);
 
 
         if (Random.value < 0.5f)
@@ -91,6 +90,7 @@ public class Creature : MonoBehaviour
     public void SetSpecies(SpeciesTypes species)
     {
         _species = species;
+        name = SpeciesType.ToString() + " (" + Id + ")";
     }
 
     public void SetDiet(FoodType diet)

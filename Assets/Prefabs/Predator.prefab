@@ -281,7 +281,7 @@ MonoBehaviour:
   femaleMaterial: {fileID: 2100000, guid: fc51313f927263b459b1f702df8ce43b, type: 2}
   maleMaterial: {fileID: 2100000, guid: 79877813337fd784eadb78d8e0bb57a7, type: 2}
   statusTextMesh: {fileID: 2961299266337164980}
-  scaleProgression: {x: 0.2, y: 1}
+  scaleProgression: {x: 0.2, y: 0.8}
   _id: 0
   _isDying: 0
 --- !u!114 &2961299266921261728

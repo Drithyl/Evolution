@@ -166,7 +166,7 @@ public class MovementGene : Gene
         
         transform.position = Vector3.Lerp(
             transform.position,
-            CurrentMoveTarget.Centre,
+            CurrentMoveTarget.Centre + (Vector3.up * transform.localScale.y * 0.5f),
             moveProgress
         );
 
@@ -180,7 +180,7 @@ public class MovementGene : Gene
         _isMoving = false;
         moveProgress = 0;
         statistics.TilesTraveled++;
-        transform.position = CurrentMoveTarget.Centre;
+        transform.position = CurrentMoveTarget.Centre + (Vector3.up * transform.localScale.y * 0.5f);
         _currentMoveTarget = null;
     }
 
