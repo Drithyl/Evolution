@@ -15,11 +15,14 @@ More details on the goals of the project can be found in my [midterm report](htt
 * FoodType enum to support different diets (herbivore and carnivore) through the same HungerGene without modification. Will allow easy addition of new carnivore species
 * Refactored to enable easier filtering and options in methods. TerrainTypes are a bitmask so tiles can have multiple types within one value; Sex is now an enum like FoodType.
 * Values have been tweaked to the point where the current species can survive indefinitely, with ups and downs in population.
+* Added predators that devour the herbivores and reproduce just like them.
+* Added line graphs for causes of death per month and average values of nutrition genes (hunger and thirst).
 
 
 ## Next Steps
 
-* Creating more working graphs to display other statistics like average values of genes.
-* New carnivore species that prey on the herbivores to add a more active threat and means of population control.
-* Flesh out Species definition into its own class that will determine which Genes and which Gene value ranges each species has.
+* Creating even more graphs to show statistics.
+* Tweak values of predators and herbivores to achieve an interesting evolution simulation.
 * Optimize pathing and other areas to enable for larger populations and faster simulations.
+* Use proper models to prettify things.
+* Ingame cameras to follow specific creatures and look at graphs.
