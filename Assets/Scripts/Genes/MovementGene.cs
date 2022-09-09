@@ -6,7 +6,7 @@ public class MovementGene : Gene
 {
     private Creature parent;
     private Statistics statistics;
-
+    private PerceptionGene perceptionGene;
 
     [SerializeField]
     private float _turnRatioToCompleteMove;
@@ -39,9 +39,14 @@ public class MovementGene : Gene
 
     private void Awake()
     {
+        Randomize();
+    }
+
+    private void Start()
+    {
         parent = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
-        Randomize();
+        perceptionGene = GetComponent<PerceptionGene>();
     }
 
     private void Update()
@@ -84,7 +89,7 @@ public class MovementGene : Gene
         else _moveQueue = new List<GridCoord>();
     }
 
-    public void Explore(PerceptionGene perceptionGene)
+    public void Explore()
     {
         WorldTile randomTile;
         TerrainSearchOptions options = new TerrainSearchOptions();
@@ -93,6 +98,7 @@ public class MovementGene : Gene
         options.includedTerrain = TerrainTypes.Land | TerrainTypes.Empty;
         options.searchDistance = Mathf.Pow(perceptionGene.DistanceInt, 2);
         options.distanceCalculation = GridCoord.GridSqrDistance;
+        options.isCentreIncluded = false;
 
         randomTile = WorldMap.Instance.RandomTileFrom(
             parent.Position,
@@ -108,14 +114,14 @@ public class MovementGene : Gene
         List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile.Coord);
         
         if (path == null)
-        {
+        { 
             Debug.Log("Invalid path found to explore; ignoring");
             return;
         }
 
         _moveQueue = path;
         parent.SetStatusText("Exploring to " + randomTile.Coord.ToString());
-        //Debug.Log("Exploring towards tile " + randomTile.ToString());
+        StartMove();
     }
 
 
@@ -125,7 +131,6 @@ public class MovementGene : Gene
 
         if (_currentMoveTarget.IsWalkable == false)
         {
-            Debug.Log("Tile not walkable!");
             _currentMoveTarget = null;
 
             if (MoveQueue.Count == 1)
@@ -149,6 +154,9 @@ public class MovementGene : Gene
         // Let the position be set by a single source at all levels rather than here
         WorldMap.Instance.SetCreaturePosition(parent, _currentMoveTarget.Coord);
 
+        // Rotate towards the movement direction
+        parent.RotateToTarget(_currentMoveTarget.Centre);
+
         // Consume nutrition upfront, since the position is changed upfront too
         ConsumeNutrition();
         //Debug.Log("Starting move to " + moveTarget.ToString());
@@ -166,9 +174,11 @@ public class MovementGene : Gene
         
         transform.position = Vector3.Lerp(
             transform.position,
-            CurrentMoveTarget.Centre + (Vector3.up * transform.localScale.y * 0.5f),
+            CurrentMoveTarget.Centre,
             moveProgress
         );
+
+        DebugMovementPath();
 
         if (moveProgress == 1)
             FinishMove();
@@ -180,7 +190,7 @@ public class MovementGene : Gene
         _isMoving = false;
         moveProgress = 0;
         statistics.TilesTraveled++;
-        transform.position = CurrentMoveTarget.Centre + (Vector3.up * transform.localScale.y * 0.5f);
+        transform.position = CurrentMoveTarget.Centre;
         _currentMoveTarget = null;
     }
 
@@ -208,7 +218,7 @@ public class MovementGene : Gene
         foreach (GridCoord coord in MoveQueue)
         {
             WorldTile tile = WorldMap.Instance.GetWorldTile(coord);
-            Debug.DrawLine(current.Centre, tile.Centre, Color.magenta);
+            Debug.DrawLine(current.Centre, tile.Centre, Color.yellow);
             current = tile;
         }
 
@@ -216,5 +226,18 @@ public class MovementGene : Gene
 
         foreach (var tile in perceptionRadius)
             Debug.DrawRay(WorldTerrain.GetTileCentre(tile), Vector3.up, Color.blue);*/
+    }
+
+    void DebugMovementPath()
+    {
+        if (_currentMoveTarget == null)
+            return;
+
+        Debug.DrawRay(_currentMoveTarget.Centre, Vector3.up, Color.red);
+        Debug.DrawLine(
+            new Vector3(transform.position.x, TerrainConstants.LAND_LEVEL_HEIGHT, transform.position.z), 
+            _currentMoveTarget.Centre, 
+            Color.red
+        );
     }
 }

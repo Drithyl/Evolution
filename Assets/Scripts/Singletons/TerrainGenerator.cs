@@ -24,13 +24,11 @@ public class TerrainGenerator : MonoBehaviour
     [Range(5, 100)]
     public float scale = 10;
 
-    [Tooltip("Percentage chance for starting food to spawn on land tile")]
-    [Range(0, 1)]
-    public float plantDistribution = 0.15f;
-
     public bool autoUpdate = true;
 
     public Material material;
+    public GameObject waterParticlesPrefab;
+
     private TerrainMesh mesh;
 
     [SerializeField]
@@ -56,7 +54,7 @@ public class TerrainGenerator : MonoBehaviour
             needsUpdate = false;
             GenerateTerrain();
             PlantSpawner.Instance.ClearPlants();
-            PlantSpawner.Instance.SpawnPlant(plantDistribution);
+            PlantSpawner.Instance.SpawnPlants();
         }
     }
 

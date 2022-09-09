@@ -208,7 +208,10 @@ public class ReproductionGene : Gene
         );
 
         if (closestMate == null)
+        {
+            movementGene.Explore();
             return;
+        }
 
 
         ReproductionGene mateReproductionGene = closestMate.GetComponent<ReproductionGene>();
@@ -229,7 +232,15 @@ public class ReproductionGene : Gene
         if (movementGene != null)
         {
             List<GridCoord> path = AStar.GetShortestPath(parent.Position, TargetMate.Position);
+
+            if (path == null)
+            {
+                movementGene.Explore();
+                return;
+            }
+
             movementGene.SetMovePath(path);
+            movementGene.StartMove();
         }
     }
 
@@ -297,7 +308,8 @@ public class ReproductionGene : Gene
 
         if (emptyTile == null)
         {
-            Debug.Log("No empty tile to spawn offspring; waiting another turn");
+            _offspringLeftToSpawn--;
+            GlobalStatistics.Instance.AddDeath(CauseOfDeath.Overcrowding);
             return;
         }
 
@@ -316,8 +328,5 @@ public class ReproductionGene : Gene
 
         Creature offspring = CreatureSpawner.Instance.Spawn(parent.SpeciesType, emptyTile.Coord);
         offspring.CompleteBirthProcess(inheritedGenome, pregnancyProgress, _targetMateStatistics, statistics);
-
-        if (TargetMate == null)
-            Debug.Log("Father died during pregnancy!");
     }
 }

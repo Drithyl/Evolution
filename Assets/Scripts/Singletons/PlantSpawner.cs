@@ -7,7 +7,7 @@ public class PlantSpawner : MonoBehaviour
 {
     static public PlantSpawner Instance { get; private set; }
 
-    public GameObject foodPrefab;
+    public GameObject[] plantPrefabs;
 
     private void Awake()
     {
@@ -38,7 +38,7 @@ public class PlantSpawner : MonoBehaviour
             DestroyImmediate(plant.gameObject);
     }
 
-    public void SpawnPlant(float foodChancePerTile)
+    public void SpawnPlants(float foodChanceModifier = 1)
     {
         for (int x = 0; x < WorldMap.Instance.Width; x++)
         {
@@ -52,17 +52,18 @@ public class PlantSpawner : MonoBehaviour
                 if (tile.HasFood(FoodType.Plant) == true)
                     continue;
 
-                if (Random.value > foodChancePerTile)
+                if (Random.value > BiomeManager.Instance.GetBiomeFoodChance(tile.HeightMapValue) * foodChanceModifier)
                     continue;
 
-                GameObject plant = Instantiate(foodPrefab, transform);
+                GameObject randomPlantPrefab = plantPrefabs[Random.Range(0, plantPrefabs.Length)];
+                GameObject plant = Instantiate(randomPlantPrefab, transform);
                 PlantFood foodScript = plant.GetComponent<PlantFood>();
                 foodScript.Initialize(tile.Coord);
             }
         }
     }
 
-    public void SpawnPlant(float foodChancePerTile, int startingAmount)
+    public void SpawnPlants(int startingAmount, float foodChanceModifier = 1)
     {
         for (int x = 0; x < WorldMap.Instance.Width; x++)
         {
@@ -76,10 +77,11 @@ public class PlantSpawner : MonoBehaviour
                 if (tile.HasFood(FoodType.Plant) == true)
                     continue;
 
-                if (Random.value > foodChancePerTile)
+                if (Random.value > BiomeManager.Instance.GetBiomeFoodChance(tile.HeightMapValue) * foodChanceModifier)
                     continue;
 
-                GameObject plant = Instantiate(foodPrefab, transform);
+                GameObject randomPlantPrefab = plantPrefabs[Random.Range(0, plantPrefabs.Length)];
+                GameObject plant = Instantiate(randomPlantPrefab, transform);
                 PlantFood foodScript = plant.GetComponent<PlantFood>();
                 foodScript.Initialize(tile.Coord, startingAmount);
             }

@@ -6,6 +6,10 @@ using UnityEngine;
 public class Biome
 {
     [Range(0, 1)]
+    [Tooltip("Default chance that food grows in this biome")]
+    public float foodGrowthChance;
+
+    [Range(0, 1)]
     [Tooltip("The height at which the biome begins")]
     public float start;
 
@@ -13,13 +17,11 @@ public class Biome
     [Tooltip("The height at which the biome ends")]
     public float end;
     public Gradient gradient;
-    public int numSteps;
 
-    public Biome(float startHeight, float endHeight, Gradient biomeColour, int steps)
+    public Biome(float startHeight, float endHeight, Gradient biomeColour)
     {
         start = startHeight;
         end = endHeight;
         gradient = biomeColour;
-        numSteps = steps;
     }
 }

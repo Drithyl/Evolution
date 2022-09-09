@@ -12,6 +12,9 @@ public class Creature : MonoBehaviour
     [Tooltip("Start and End scale values that the creature will lerp through as it becomes an adult.")]
     public Vector2 scaleProgression = new Vector2(0.1f, 0.5f);
 
+    [Tooltip("If prefab has a forward direction other than Z axis, add the Y axis rotation in degrees to correct it")]
+    public float yAxisRotationCorrection = -90;
+
 
     [ReadOnly]
     [SerializeField]
@@ -112,6 +115,23 @@ public class Creature : MonoBehaviour
             return;
 
         statusTextMesh.text = "";
+    }
+
+    public void RotateToTarget(Vector3 targetPosition)
+    {
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        Quaternion finalRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        transform.rotation = finalRotation;
+
+        // Correct forward direction by specified degrees. Some
+        // prefabs use the X axis as the forward axis, instead of Z
+        transform.eulerAngles += Vector3.up * yAxisRotationCorrection;
+    }
+
+    public void RotateToTarget(GridCoord targetCoord)
+    {
+        WorldTile tile = WorldMap.Instance.GetWorldTile(targetCoord);
+        RotateToTarget(tile.Centre);
     }
 
     public void Die(CauseOfDeath causeOfDeath)

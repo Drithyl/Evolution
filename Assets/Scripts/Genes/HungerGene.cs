@@ -145,6 +145,9 @@ public class HungerGene : Gene
             return;
         }
 
+        // Rotate towards the food
+        parent.RotateToTarget(food.Position);
+
         int nutritionMouthful = Mathf.FloorToInt(MouthfulNutrition);
         int nutritionObtained = food.Consume(nutritionMouthful);
 
@@ -178,7 +181,10 @@ public class HungerGene : Gene
         );
 
         if (food == null)
+        {
+            movementGene.Explore();
             return;
+        }
 
         _isSeekingFood = true;
         _targetFoodTile = WorldMap.Instance.GetWorldTile(food.Position);
@@ -197,7 +203,15 @@ public class HungerGene : Gene
         if (movementGene != null)
         {
             List<GridCoord> pathToFood = AStar.GetShortestPath(parent.Position, food.Position);
+
+            if (pathToFood == null)
+            {
+                movementGene.Explore();
+                return;
+            }
+
             movementGene.SetMovePath(pathToFood);
+            movementGene.StartMove();
         }
     }
 }

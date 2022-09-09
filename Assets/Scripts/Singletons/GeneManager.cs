@@ -72,7 +72,7 @@ public class GeneManager : MonoBehaviour
             return;
         }
 
-        if (thirstGene != null && thirstGene.IsSeekingWater == true && creatureWorldTile.Types.HasFlag(TerrainTypes.Shore) == true)
+        if (thirstGene != null && thirstGene.IsSeekingWater == true && thirstGene.CanStartDrinking() == true)
         {
             thirstGene.Drink();
             return;
@@ -97,32 +97,26 @@ public class GeneManager : MonoBehaviour
             {
                 // Males begin the mating session
                 if (creature.SexType == Sex.Types.Male && reproductionGene.CanStartMating() == true)
-                {
                     reproductionGene.StartMating();
-                    return;
-                }
 
-                else if (perceptionGene != null)
-                    reproductionGene.SeekMate(perceptionGene);
+                else reproductionGene.SeekMate(perceptionGene);
             }
 
-            else if (mostUrgentImpulse == hungerGene && perceptionGene != null)
+            else if (mostUrgentImpulse == hungerGene)
                 hungerGene.SeekFood(perceptionGene);
 
-            else if (mostUrgentImpulse == thirstGene && perceptionGene != null)
+            else if (mostUrgentImpulse == thirstGene)
                 thirstGene.SeekWater(perceptionGene);
+
+            return;
         }
 
 
-        // MOVEMENT FOLLOW-UP
+        // IF NOTHING ELSE, EXPLORE
         if (movementGene != null)
-        {
-            if (movementGene.HasMoveQueued == true)
-                movementGene.StartMove();
+            movementGene.Explore();
 
-            else if (perceptionGene != null)
-                movementGene.Explore(perceptionGene);
-        }
+        else Debug.Log("NO ACTION!!!!!");
     }
 
     private void EnsureSingleton()

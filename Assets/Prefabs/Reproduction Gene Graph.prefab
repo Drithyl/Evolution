@@ -567,12 +567,12 @@ MonoBehaviour:
   dataPointSprite: {fileID: 21300000, guid: 335d083eecf6df34b9e6bebab6d43ce6, type: 3}
   graphContainer: {fileID: 1606645563896636777}
   defaultColors:
-  - {r: 0.17275089, g: 0.6698113, b: 0, a: 1}
+  - {r: 0.8679245, g: 0.45102152, b: 0, a: 1}
   - {r: 0.4811321, g: 0, b: 0, a: 1}
   - {r: 0.8207547, g: 0.16647384, b: 0.8017027, a: 1}
   - {r: 0, g: 0.49761155, b: 0.6226415, a: 1}
   defaultMaterials:
-  - {fileID: 2100000, guid: 30e69fe123b5ca44b85b57fb263a6e1a, type: 2}
+  - {fileID: 2100000, guid: 3298003636b5875419d9c7cbea77d50a, type: 2}
   - {fileID: 2100000, guid: 81f5c1f77a8729b4a92c1f3153b7c2d2, type: 2}
   - {fileID: 2100000, guid: 598b4b82a5ad8c2419e026d886f93786, type: 2}
   - {fileID: 2100000, guid: 60c041b910de1f14ca38e6234f749e83, type: 2}

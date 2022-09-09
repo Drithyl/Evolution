@@ -147,4 +147,11 @@ public class WorldTile
         creatureOnTile = null;
         types |= TerrainTypes.Empty;
     }
+
+    public void PlayWaterParticles(float duration)
+    {
+        GameObject particlesObject = GameObject.Instantiate(TerrainGenerator.Instance.waterParticlesPrefab, Centre, Quaternion.identity);
+        WaterParticles waterParticles = particlesObject.GetComponent<WaterParticles>();
+        waterParticles.PlayWaterParticles(duration);
+    }
 }

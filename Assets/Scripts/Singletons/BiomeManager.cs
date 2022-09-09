@@ -35,6 +35,19 @@ public class BiomeManager : MonoBehaviour
         return height >= biomes[0].start && height < biomes[0].end;
     }
 
+    public float GetBiomeFoodChance(float height)
+    {
+        for (int i = 0; i < biomes.Count; i++)
+        {
+            if (height >= biomes[i].start && height <= biomes[i].end)
+            {
+                return biomes[i].foodGrowthChance;
+            }
+        }
+
+        throw new Exception("No biome exists at height " + height);
+    }
+
     public int GetBiomeIndexAtHeight(float height)
     {
         for (int i = 0; i < biomes.Count; i++)

@@ -281,8 +281,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4285442269
-  m_fontColor: {r: 0.8666667, g: 0.65882355, b: 0.43333334, a: 1}
+    rgba: 4278190203
+  m_fontColor: {r: 0.4811321, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1641,14 +1641,14 @@ MonoBehaviour:
   graphContainer: {fileID: 4901778589900426300}
   defaultColors:
   - {r: 0.8679245, g: 0.45102152, b: 0, a: 1}
-  - {r: 0.8666667, g: 0.7003921, b: 0.52, a: 1}
+  - {r: 0.4811321, g: 0, b: 0, a: 1}
   - {r: 0, g: 0.49761155, b: 0.6226415, a: 1}
-  - {r: 0.4364706, g: 0.58588237, b: 0.62352943, a: 1}
+  - {r: 0.17275089, g: 0.6698113, b: 0, a: 1}
   defaultMaterials:
   - {fileID: 2100000, guid: 3298003636b5875419d9c7cbea77d50a, type: 2}
-  - {fileID: 2100000, guid: 136226db4e92c9343b414ea365e7a17e, type: 2}
+  - {fileID: 2100000, guid: 81f5c1f77a8729b4a92c1f3153b7c2d2, type: 2}
   - {fileID: 2100000, guid: 60c041b910de1f14ca38e6234f749e83, type: 2}
-  - {fileID: 2100000, guid: 5babbf63898a1d54cb3f183cbace237b, type: 2}
+  - {fileID: 2100000, guid: 30e69fe123b5ca44b85b57fb263a6e1a, type: 2}
   graphLineThickness: 0.2
   lineDepth: 0.1
   lineGraphics: []
@@ -2813,8 +2813,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4288646992
-  m_fontColor: {r: 0.31176472, g: 0.5607843, b: 0.62352943, a: 1}
+    rgba: 4278233900
+  m_fontColor: {r: 0.17275089, g: 0.6698113, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

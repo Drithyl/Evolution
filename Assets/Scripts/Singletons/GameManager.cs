@@ -26,11 +26,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int turnsBetweenMonths = 10;
 
-    [Tooltip("The percentage chance for new food to appear in a tile each month.")]
-    [Range(0.001f, 100)]
-    [SerializeField]
-    private float chanceOfFoodToSpawn = 0.01f;
-
     [Tooltip("The amount that newly grown food starts with.")]
     [Range(1, 10)]
     [SerializeField]
@@ -153,7 +148,7 @@ public class GameManager : MonoBehaviour
             EmitNewMonthEvent();
 
             GrowFood();
-            SpreadFood(chanceOfFoodToSpawn);
+            SpreadFood();
         }
 
         // Reverse loop so creatures can be removed from the list
@@ -241,9 +236,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SpreadFood(float chance)
+    private void SpreadFood(float chanceModifier = 1)
     {
-        PlantSpawner.Instance.SpawnPlant(chance, startFoodOnNewGrowth);
+        PlantSpawner.Instance.SpawnPlants(startFoodOnNewGrowth, chanceModifier);
     }
 
 

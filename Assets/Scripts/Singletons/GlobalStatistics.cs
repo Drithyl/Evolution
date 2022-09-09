@@ -140,6 +140,11 @@ public class GlobalStatistics : MonoBehaviour
         UpdateMostCommonCauseOfDeath();
     }
 
+    public void AddDeath(CauseOfDeath causeOfDeath)
+    {
+        causeOfDeathCounters[(int)causeOfDeath]++;
+    }
+
     public int GetCauseOfDeathCount(CauseOfDeath causeOfDeath)
     {
         return causeOfDeathCounters[(int)causeOfDeath];

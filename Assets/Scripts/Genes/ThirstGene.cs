@@ -7,6 +7,8 @@ public class ThirstGene : Gene
     private Creature parent;
     private Statistics statistics;
 
+    private WorldTile waterSource;
+
     [SerializeField]
     private int _maxThirst;
     public Vector2Int MaxThirstRange { get; set; }
@@ -108,15 +110,28 @@ public class ThirstGene : Gene
         _mouthfulNutrition = Mathf.Max(1, MouthfulNutrition + Random.Range(-mouthfulNutritionMutatePercent, mouthfulNutritionMutatePercent));
     }
 
+    public bool CanStartDrinking()
+    {
+        if (waterSource == null)
+            return false;
+
+        return GridCoord.AreAdjacent(parent.Position, waterSource.Coord);
+    }
+
     public void Drink()
     {
         int waterDrunk = Mathf.FloorToInt(MouthfulNutrition);
 
+        // Rotate towards the water
+        parent.RotateToTarget(waterSource.Centre);
+
         // Creatures can overdrink and overeat, which makes bigger
         // mouthfuls potentially more advantageous
         _currentThirst += waterDrunk;
-
         statistics.WaterDrunk += waterDrunk;
+
+        waterSource.PlayWaterParticles(GameManager.Instance.TimeBetweenTurns);
+
         parent.SetStatusText("Drinking");
 
         if (IsFull == true)
@@ -133,15 +148,43 @@ public class ThirstGene : Gene
         );
 
         if (shoreTile == null)
+        {
+            movementGene.Explore();
             return;
+        }
 
+        // Find water tile next to shore to set it as target water source
+        WorldTile waterTile = WorldMap.Instance.ClosestTileInRadius(
+            shoreTile.Coord,
+            1,
+            TerrainTypes.Water
+        );
+
+        
         _isSeekingWater = true;
+        waterSource = waterTile;
+
+        // If the water is already next to the creature; just drink
+        if (CanStartDrinking() == true)
+        {
+            Drink();
+            return;
+        }
+
         parent.SetStatusText("Moving to shore");
 
         if (movementGene != null)
         {
-            List<GridCoord> pathToWater = AStar.GetShortestPath(parent.Position, shoreTile.Coord);
-            movementGene.SetMovePath(pathToWater);
+            List<GridCoord> pathToShore = AStar.GetShortestPath(parent.Position, shoreTile.Coord);
+
+            if (pathToShore == null)
+            {
+                movementGene.Explore();
+                return;
+            }
+
+            movementGene.SetMovePath(pathToShore);
+            movementGene.StartMove();
         }
     }
 }

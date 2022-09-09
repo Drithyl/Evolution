@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3921761873076892200}
   - component: {fileID: 99420010156502576}
   - component: {fileID: 2797935785133697797}
-  - component: {fileID: 851827203540654736}
   m_Layer: 3
   m_Name: Plant
   m_TagString: Untagged
@@ -102,16 +101,3 @@ MonoBehaviour:
   maxAmount: 0
   amount: 0
   _reachedFullGrowth: 0
---- !u!135 &851827203540654736
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1084421854511209098}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.49999997
-  m_Center: {x: 0, y: 0, z: 0}

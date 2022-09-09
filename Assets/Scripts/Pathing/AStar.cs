@@ -99,7 +99,6 @@ public class AStar
         }
 
         // If we reach here, no path to the end point was found
-        Debug.Log("No path to end found");
         return null;
     }
 
