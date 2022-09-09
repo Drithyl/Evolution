@@ -16,6 +16,7 @@ More details on the goals of the project can be found in my [midterm report](htt
 * Easy filtering and options in methods. TerrainTypes are a bitmask so tiles can have multiple types within one value; Sex is now an enum like FoodType.
 * Values have been tweaked to the point where the herbivore species can survive indefinitely, with ups and downs in population.
 * Working in-game 3rd person camera to fly through the world and observe the simulation or follow specific creatures.
+* Prettified world with asset store meshes, custom particle effects, emission materials, etc.
 
 
 ## Next Steps
@@ -23,4 +24,3 @@ More details on the goals of the project can be found in my [midterm report](htt
 * Creating even more graphs to show statistics.
 * Tweak values of predators and herbivores to achieve an interesting evolution simulation.
 * Optimize pathing and other areas to enable for larger populations and faster simulations.
-* Use proper models to prettify things.
