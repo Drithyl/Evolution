@@ -100,6 +100,7 @@ public class GlobalStatistics : MonoBehaviour
     }
 
 
+    private int[][] causeOfDeathCountersBySpecies;
     private int[] causeOfDeathCounters;
 
     [ReadOnly]
@@ -107,13 +108,25 @@ public class GlobalStatistics : MonoBehaviour
     private string _mostCommonCauseOfDeath;
     public string MostCommonCauseOfDeath { get { return _mostCommonCauseOfDeath; } }
 
+    [ReadOnly]
+    [SerializeField]
+    private string[] _mostCommonCauseOfDeathBySpecies;
+    public string[] MostCommonCauseOfDeathBySpecies { get { return _mostCommonCauseOfDeathBySpecies; } }
+
 
 
     private void Awake()
     {
         EnsureSingleton();
         Array deathTypes = Enum.GetValues(typeof(CauseOfDeath));
+        Array speciesTypes = Enum.GetValues(typeof(SpeciesTypes));
+
         causeOfDeathCounters = new int[deathTypes.Length];
+        causeOfDeathCountersBySpecies = new int[speciesTypes.Length][];
+        _mostCommonCauseOfDeathBySpecies = new string[speciesTypes.Length];
+
+        for (int i = 0; i < speciesTypes.Length; i++)
+            causeOfDeathCountersBySpecies[i] = new int[deathTypes.Length];
     }
 
     private void OnValidate()
@@ -133,21 +146,34 @@ public class GlobalStatistics : MonoBehaviour
 
     public void RecordCreatureStatistics(Statistics statistics)
     {
+        int deathIndex = (int)statistics.DeathCausedBy;
+        int speciesIndex = (int)statistics.Owner.SpeciesType;
+
         _totalDeaths++;
         creatureStatistics.Add(statistics);
-        causeOfDeathCounters[(int)statistics.DeathCausedBy]++;
+        causeOfDeathCounters[deathIndex]++;
+        causeOfDeathCountersBySpecies[speciesIndex][deathIndex]++;
 
         UpdateMostCommonCauseOfDeath();
     }
 
-    public void AddDeath(CauseOfDeath causeOfDeath)
+    public void AddDeath(CauseOfDeath causeOfDeath, SpeciesTypes species)
     {
         causeOfDeathCounters[(int)causeOfDeath]++;
+        causeOfDeathCountersBySpecies[(int)species][(int)causeOfDeath]++;
     }
 
     public int GetCauseOfDeathCount(CauseOfDeath causeOfDeath)
     {
         return causeOfDeathCounters[(int)causeOfDeath];
+    }
+
+    public int GetCauseOfDeathCount(CauseOfDeath causeOfDeath, SpeciesTypes species)
+    {
+        if (species == SpeciesTypes.Any)
+            return GetCauseOfDeathCount(causeOfDeath);
+
+        return causeOfDeathCountersBySpecies[(int)species][(int)causeOfDeath];
     }
 
     private void OnMonthPassedHandler(object sender, MonthPassedArgs args)
@@ -158,12 +184,31 @@ public class GlobalStatistics : MonoBehaviour
     private void UpdateMostCommonCauseOfDeath()
     {
         int mostCommonIndex = 0;
+        Array speciesTypes = Enum.GetValues(typeof(SpeciesTypes));
+        int[] mostCommonIndexesBySpecies = new int[speciesTypes.Length];
+
 
         for (int i = 1; i < causeOfDeathCounters.Length; i++)
             if (causeOfDeathCounters[i] > causeOfDeathCounters[mostCommonIndex])
                 mostCommonIndex = i;
 
+
+        for (int i = 0; i < causeOfDeathCountersBySpecies.Length; i++)
+        {
+            int[] speciesCounter = causeOfDeathCountersBySpecies[i];
+            int mostCommonIndexBySpecies = mostCommonIndexesBySpecies[i];
+
+            for (int j = 1; j < speciesCounter.Length; j++)
+            {
+                if (speciesCounter[j] > speciesCounter[mostCommonIndexBySpecies])
+                    mostCommonIndexBySpecies = j;
+            }
+
+            _mostCommonCauseOfDeathBySpecies[i] = Enum.GetName(typeof(CauseOfDeath), mostCommonIndexBySpecies);
+        }
+
         _mostCommonCauseOfDeath = Enum.GetName(typeof(CauseOfDeath), mostCommonIndex);
+        
     }
 
     private void EnsureSingleton()

@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: -6021154513186086761}
   - component: {fileID: 2941997248979041427}
   - component: {fileID: 8878723422682424927}
+  - component: {fileID: 2316150167678920334}
   m_Layer: 0
   m_Name: Goat
   m_TagString: Untagged
@@ -257,6 +258,18 @@ MonoBehaviour:
   _mouthfulNutrition: 0
   _isSeekingWater: 0
   _isThirsty: 0
+--- !u!114 &2316150167678920334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749815345293910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c9dca23c510e0b4480b9162dcabbcc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1977886718355313844
 PrefabInstance:
   m_ObjectHideFlags: 0

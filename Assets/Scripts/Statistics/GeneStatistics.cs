@@ -83,7 +83,11 @@ public class GeneStatistics
     }
 
 
-    public void AverageAgeValues()
+    /**
+     * TODO: EDIT AVERAGE METHODS TO RETURN A STRUCTURE INSTEAD OF
+     * SAVING THE DATA IN THE LOCAL VARIABLES, TO WORK BETTER WITH FILTERS
+    **/
+    public void AverageAgeValues(SpeciesTypes species = SpeciesTypes.Any)
     {
         float maxAgeTotal = 0;
         float maturityAgeTotal = 0;
@@ -91,8 +95,13 @@ public class GeneStatistics
 
         foreach(var pair in ageGenes)
         {
-            maxAgeTotal += pair.Value.MaxAge;
-            maturityAgeTotal += pair.Value.MaturityAge;
+            AgeGene gene = pair.Value;
+
+            if (species != SpeciesTypes.Any && gene.Owner.SpeciesType != species)
+                continue;
+
+            maxAgeTotal += gene.MaxAge;
+            maturityAgeTotal += gene.MaturityAge;
         }
 
         maxAgeAverage = maxAgeTotal / count;
@@ -100,7 +109,7 @@ public class GeneStatistics
     }
 
 
-    public void AverageHungerValues()
+    public void AverageHungerValues(SpeciesTypes species = SpeciesTypes.Any)
     {
         float maxHungerTotal = 0;
         float mouthfulTotal = 0;
@@ -108,8 +117,13 @@ public class GeneStatistics
 
         foreach (var pair in hungerGenes)
         {
-            maxHungerTotal += pair.Value.MaxHunger;
-            mouthfulTotal += pair.Value.MouthfulNutrition;
+            HungerGene gene = pair.Value;
+
+            if (species != SpeciesTypes.Any && gene.Owner.SpeciesType != species)
+                continue;
+
+            maxHungerTotal += gene.MaxHunger;
+            mouthfulTotal += gene.MouthfulNutrition;
         }
 
         maxHungerAverage = maxHungerTotal / count;
@@ -117,35 +131,45 @@ public class GeneStatistics
     }
 
 
-    public void AverageMovementValues()
+    public void AverageMovementValues(SpeciesTypes species = SpeciesTypes.Any)
     {
         float turnRatioTotal = 0;
         int count = movementGenes.Values.Count;
 
         foreach (var pair in movementGenes)
         {
-            turnRatioTotal += pair.Value.TurnRatioToCompleteMove;
+            MovementGene gene = pair.Value;
+
+            if (species != SpeciesTypes.Any && gene.Owner.SpeciesType != species)
+                continue;
+
+            turnRatioTotal += gene.TurnRatioToCompleteMove;
         }
 
         turnRatioToCompleteMoveAverage = turnRatioTotal / count;
     }
 
 
-    public void AveragePerceptionbValues()
+    public void AveragePerceptionbValues(SpeciesTypes species = SpeciesTypes.Any)
     {
         float distanceTotal = 0;
         int count = perceptionGenes.Values.Count;
 
         foreach (var pair in perceptionGenes)
         {
-            distanceTotal += pair.Value.Distance;
+            PerceptionGene gene = pair.Value;
+
+            if (species != SpeciesTypes.Any && gene.Owner.SpeciesType != species)
+                continue;
+
+            distanceTotal += gene.Distance;
         }
 
         perceptionRadiusAverage = distanceTotal / count;
     }
 
 
-    public void AverageReproductionValues()
+    public void AverageReproductionValues(SpeciesTypes species = SpeciesTypes.Any)
     {
         float maxOffspringTotal = 0;
         float matingUrgeTotal = 0;
@@ -155,10 +179,15 @@ public class GeneStatistics
 
         foreach (var pair in reproductionGenes)
         {
-            maxOffspringTotal += pair.Value.MaxOffspring;
-            matingUrgeTotal += pair.Value.MatingUrge;
-            turnsToCompleteMatingTotal += pair.Value.TurnsToCompleteMating;
-            monthsOfPregnancyTotal += pair.Value.MonthsOfPregnancy;
+            ReproductionGene gene = pair.Value;
+
+            if (species != SpeciesTypes.Any && gene.Owner.SpeciesType != species)
+                continue;
+
+            maxOffspringTotal += gene.MaxOffspring;
+            matingUrgeTotal += gene.MatingUrge;
+            turnsToCompleteMatingTotal += gene.TurnsToCompleteMating;
+            monthsOfPregnancyTotal += gene.MonthsOfPregnancy;
         }
 
         maxOffspringAverage = maxOffspringTotal / count;
@@ -168,7 +197,7 @@ public class GeneStatistics
     }
 
 
-    public void AverageThirstValues()
+    public void AverageThirstValues(SpeciesTypes species = SpeciesTypes.Any)
     {
         float maxThirstTotal = 0;
         float mouthfulTotal = 0;
@@ -176,8 +205,13 @@ public class GeneStatistics
 
         foreach (var pair in thirstGenes)
         {
-            maxThirstTotal += pair.Value.MaxThirst;
-            mouthfulTotal += pair.Value.MouthfulNutrition;
+            ThirstGene gene = pair.Value;
+
+            if (species != SpeciesTypes.Any && gene.Owner.SpeciesType != species)
+                continue;
+
+            maxThirstTotal += gene.MaxThirst;
+            mouthfulTotal += gene.MouthfulNutrition;
         }
 
         maxThirstAverage = maxThirstTotal / count;

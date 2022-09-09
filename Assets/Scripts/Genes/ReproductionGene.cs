@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class ReproductionGene : Gene
 {
-    private Creature parent;
     private Statistics statistics;
     private AgeGene ageGene;
     private MovementGene movementGene;
@@ -56,7 +55,7 @@ public class ReproductionGene : Gene
     { 
         get 
         {
-            if (parent.SexType == Sex.Types.Male)
+            if (Owner.SexType == Sex.Types.Male)
                 return false;
 
             return _isPregnant; 
@@ -98,11 +97,14 @@ public class ReproductionGene : Gene
     }
 
 
+    private Creature _owner;
+    public override Creature Owner => _owner;
+
     override public string Name { get { return "Reproduction"; } }
 
     private void Awake()
     {
-        parent = GetComponent<Creature>();
+        _owner = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
         ageGene = GetComponent<AgeGene>();
         movementGene = GetComponent<MovementGene>();
@@ -157,15 +159,15 @@ public class ReproductionGene : Gene
         if (partnerReproductionGene == null)
             return false;
 
-        if (partnerReproductionGene.IsSuitableMatingPartner(parent) == false)
+        if (partnerReproductionGene.IsSuitableMatingPartner(Owner) == false)
             return false;
 
-        return GridCoord.AreAdjacent(parent.Position, _targetMate.Position);
+        return GridCoord.AreAdjacent(Owner.Position, _targetMate.Position);
     }
 
     public bool IsSuitableMatingPartner(Creature suitor)
     {
-        if (parent.SexType == suitor.SexType)
+        if (Owner.SexType == suitor.SexType)
         {
             //Debug.Log("Same sex!");
             return false;
@@ -201,10 +203,10 @@ public class ReproductionGene : Gene
     public void SeekMate(PerceptionGene perceptionGene)
     {
         Creature closestMate = WorldMap.Instance.ClosestCreatureInRadius(
-            parent.Position,
+            Owner.Position,
             perceptionGene.DistanceInt,
-            parent.SpeciesType,
-            Sex.OppositeSex(parent.SexType)
+            Owner.SpeciesType,
+            Sex.OppositeSex(Owner.SexType)
         );
 
         if (closestMate == null)
@@ -219,7 +221,7 @@ public class ReproductionGene : Gene
         if (mateReproductionGene == null)
             return;
 
-        if (mateReproductionGene.IsSuitableMatingPartner(parent) == false)
+        if (mateReproductionGene.IsSuitableMatingPartner(Owner) == false)
         {
             //Debug.Log("Not a suitable partner");
             return;
@@ -227,11 +229,11 @@ public class ReproductionGene : Gene
 
         //Debug.Log("Found mate!");
         _targetMate = closestMate;
-        parent.SetStatusText("Moving to Mate");
+        Owner.SetStatusText("Moving to Mate");
 
         if (movementGene != null)
         {
-            List<GridCoord> path = AStar.GetShortestPath(parent.Position, TargetMate.Position);
+            List<GridCoord> path = AStar.GetShortestPath(Owner.Position, TargetMate.Position);
 
             if (path == null)
             {
@@ -249,10 +251,10 @@ public class ReproductionGene : Gene
     {
         ReproductionGene mateReproductionGene = TargetMate.GetComponent<ReproductionGene>();
 
-        if (mateReproductionGene.IsSuitableMatingPartner(parent) == false)
+        if (mateReproductionGene.IsSuitableMatingPartner(Owner) == false)
             return;
 
-        matingSession = new MatingSession(TargetMate, parent, mateReproductionGene.TurnsToCompleteMating);
+        matingSession = new MatingSession(TargetMate, Owner, mateReproductionGene.TurnsToCompleteMating);
         mateReproductionGene.matingSession = matingSession;
     }
 
@@ -298,18 +300,18 @@ public class ReproductionGene : Gene
     {
         WorldTile emptyTile;
         TerrainSearchOptions options = new TerrainSearchOptions();
-        int numberOfLeftGenes = Random.Range(0, parent.Genome.NumberOfGenes);
+        int numberOfLeftGenes = Random.Range(0, Owner.Genome.NumberOfGenes);
 
         options.patternRadius = 1;
         options.isCentreIncluded = false;
         options.includedTerrain = TerrainTypes.Land | TerrainTypes.Empty;
 
-        emptyTile = WorldMap.Instance.RandomTileFrom(parent.Position, options);
+        emptyTile = WorldMap.Instance.RandomTileFrom(Owner.Position, options);
 
         if (emptyTile == null)
         {
             _offspringLeftToSpawn--;
-            GlobalStatistics.Instance.AddDeath(CauseOfDeath.Overcrowding);
+            GlobalStatistics.Instance.AddDeath(CauseOfDeath.Overcrowding, Owner.SpeciesType);
             return;
         }
 
@@ -318,7 +320,7 @@ public class ReproductionGene : Gene
 
         //Debug.Log("Parents Genome Ratio: " + numberOfLeftGenes);
         (Gene[] left, Gene[] right) paternalGenome = Genome.SpliceGenome(_targetMateGenes, numberOfLeftGenes);
-        (Gene[] left, Gene[] right) maternalGenome = Genome.SpliceGenome(parent.Genome.CopyOfGenes, numberOfLeftGenes);
+        (Gene[] left, Gene[] right) maternalGenome = Genome.SpliceGenome(Owner.Genome.CopyOfGenes, numberOfLeftGenes);
 
         Gene[] inheritedGenome = new Gene[paternalGenome.left.Length + maternalGenome.right.Length];
 
@@ -326,7 +328,7 @@ public class ReproductionGene : Gene
         maternalGenome.right.CopyTo(inheritedGenome, paternalGenome.left.Length);
         //Debug.Log("Inherited genome: " + inheritedGenome.Length);
 
-        Creature offspring = CreatureSpawner.Instance.Spawn(parent.SpeciesType, emptyTile.Coord);
+        Creature offspring = CreatureSpawner.Instance.Spawn(Owner.SpeciesType, emptyTile.Coord);
         offspring.CompleteBirthProcess(inheritedGenome, pregnancyProgress, _targetMateStatistics, statistics);
     }
 }

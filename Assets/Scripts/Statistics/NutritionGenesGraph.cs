@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class NutritionGenesGraph : MonoBehaviour
 {
+    public SpeciesTypes speciesFilter = SpeciesTypes.Any;
+
     private DataLineRenderer maxHungerLine;
     public TMPro.TextMeshPro hungerLineInitialValueMesh;
     public TMPro.TextMeshPro hungerLineCurrentValueMesh;
@@ -64,6 +66,9 @@ public class NutritionGenesGraph : MonoBehaviour
 
     private void OnMonthPassedHandler(object sender, MonthPassedArgs args)
     {
+        GeneStatistics.Instance.AverageHungerValues(speciesFilter);
+        GeneStatistics.Instance.AverageThirstValues(speciesFilter);
+
         maxHungerLine.AddDataPoint(GeneStatistics.Instance.maxHungerAverage);
         foodMouthfulLine.AddDataPoint(GeneStatistics.Instance.foodMouthfulAverage);
 

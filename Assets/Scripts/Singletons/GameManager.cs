@@ -92,14 +92,6 @@ public class GameManager : MonoBehaviour
     {
         TerrainGenerator.Instance.Initialize();
 
-        /*float startTime = Time.realtimeSinceStartup;
-        WorldPositions.SpiralSpeedTest(Mathf.FloorToInt(WorldMap.Instance.Width * 0.5f), Mathf.FloorToInt(WorldMap.Instance.Height), Mathf.FloorToInt(WorldMap.Instance.Width * 0.2f));
-        Debug.Log("Spiral time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");
-
-        startTime = Time.realtimeSinceStartup;
-        WorldPositions.SquareSpeedTest(Mathf.FloorToInt(WorldMap.Instance.Width * 0.5f), Mathf.FloorToInt(WorldMap.Instance.Height), Mathf.FloorToInt(WorldMap.Instance.Width * 0.2f));
-        Debug.Log("Square time taken: " + (Time.realtimeSinceStartup - startTime).ToString("F10") + "s");*/
-
         for (int speciesIndex = 0; speciesIndex < startingCreatures.GetLength(0); speciesIndex++)
         {
             int numToSpawn = startingCreatures[speciesIndex];

@@ -41,8 +41,8 @@ LineRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4419160797746559512}
   m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 0
@@ -124,11 +124,11 @@ LineRenderer:
       m_Mode: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    numCornerVertices: 4
-    numCapVertices: 1
+    numCornerVertices: 2
+    numCapVertices: 2
     alignment: 0
-    textureMode: 0
-    shadowBias: 0.5
+    textureMode: 1
+    shadowBias: 1
     generateLightingData: 0
   m_UseWorldSpace: 1
   m_Loop: 0
@@ -146,5 +146,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   valueDisplayPrefab: {fileID: 9067291064001288047, guid: c1b5096265ac83044863e717a6e708bd, type: 3}
   thickness: 3
+  material: {fileID: 0}
   color: {r: 0, g: 0, b: 0, a: 0}
   z: 0

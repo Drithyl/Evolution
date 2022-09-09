@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class AgeGene : Gene
 {
-    private Creature parent;
     private Statistics statistics;
 
 
@@ -41,12 +40,14 @@ public class AgeGene : Gene
 
     override public float UrgeLevel => 0;
 
+    private Creature _owner;
+    public override Creature Owner => _owner;
 
     override public string Name { get { return "Age"; } }
 
     private void Awake()
     {
-        parent = GetComponent<Creature>();
+        _owner = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
 
         Randomize();
@@ -88,14 +89,14 @@ public class AgeGene : Gene
             ScaleWithAge();
 
         if (_currentAge > _maxAge)
-            parent.Die(CauseOfDeath.OldAge);
+            Owner.Die(CauseOfDeath.OldAge);
     }
 
     public void ScaleWithAge()
     {
         float currentProgressionToMaturity = CurrentAge / (float)MaturityAge;
-        float newScale = Mathf.Lerp(parent.scaleProgression.x, parent.scaleProgression.y, currentProgressionToMaturity);
+        float newScale = Mathf.Lerp(Owner.scaleProgression.x, Owner.scaleProgression.y, currentProgressionToMaturity);
 
-        parent.transform.localScale = Vector3.one * newScale;
+        Owner.transform.localScale = Vector3.one * newScale;
     }
 }

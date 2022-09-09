@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ReproductionGeneGraph : MonoBehaviour
 {
+    public SpeciesTypes speciesFilter = SpeciesTypes.Any;
+
     private DataLineRenderer maxOffspringLine;
     public TMPro.TextMeshPro maxOffspringLineInitialValueMesh;
     public TMPro.TextMeshPro maxOffspringLineCurrentValueMesh;
@@ -64,6 +66,8 @@ public class ReproductionGeneGraph : MonoBehaviour
 
     private void OnMonthPassedHandler(object sender, MonthPassedArgs args)
     {
+        GeneStatistics.Instance.AverageReproductionValues(speciesFilter);
+
         maxOffspringLine.AddDataPoint(GeneStatistics.Instance.maxOffspringAverage);
         matingUrgeLine.AddDataPoint(GeneStatistics.Instance.matingUrgeAverage);
 

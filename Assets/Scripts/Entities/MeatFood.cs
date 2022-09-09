@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class MeatFood : Food
 {
+    [Tooltip("Base amount that this creature will always yield to a carnivore, regardless of its own hunger left")]
+    [Range(0, 100)]
+    public int baseNutrition = 10;
+
     private Creature creature;
     private HungerGene hungerGene;
 

@@ -5,6 +5,8 @@ using System;
 
 public class CausesOfDeathGraph : MonoBehaviour
 {
+    public SpeciesTypes speciesFilter = SpeciesTypes.Any;
+
     public TMPro.TextMeshPro[] initialValueMeshes;
     public TMPro.TextMeshPro[] currentValueMeshes;
 
@@ -48,7 +50,7 @@ public class CausesOfDeathGraph : MonoBehaviour
         for (int i = 0; i < causeOfDeathValues.Length; i++)
         {
             CauseOfDeath causeOfDeath = causeOfDeathValues[i];
-            int causeOfDeathCount = GlobalStatistics.Instance.GetCauseOfDeathCount(causeOfDeath);
+            int causeOfDeathCount = GlobalStatistics.Instance.GetCauseOfDeathCount(causeOfDeath, speciesFilter);
 
             dataLines[i].AddDataPoint(causeOfDeathCount);
         }

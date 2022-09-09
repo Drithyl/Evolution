@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class MovementGene : Gene
 {
-    private Creature parent;
     private Statistics statistics;
     private PerceptionGene perceptionGene;
 
@@ -34,17 +33,21 @@ public class MovementGene : Gene
 
 
     public override float UrgeLevel => 0;
+
+    private Creature _owner;
+    public override Creature Owner => _owner;
+
     override public string Name { get { return "Movement"; } }
 
 
     private void Awake()
     {
+        _owner = GetComponent<Creature>();
         Randomize();
     }
 
     private void Start()
     {
-        parent = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
         perceptionGene = GetComponent<PerceptionGene>();
     }
@@ -52,7 +55,7 @@ public class MovementGene : Gene
     private void Update()
     {
         DebugExplorePath();
-        _turnRatioToCompleteMove = GameManager.Instance.TimeBetweenTurns;
+        //_turnRatioToCompleteMove = GameManager.Instance.TimeBetweenTurns;
     }
 
     public override void Randomize()
@@ -101,7 +104,7 @@ public class MovementGene : Gene
         options.isCentreIncluded = false;
 
         randomTile = WorldMap.Instance.RandomTileFrom(
-            parent.Position,
+            Owner.Position,
             options
         );
 
@@ -111,7 +114,7 @@ public class MovementGene : Gene
             return;
         }
 
-        List<GridCoord> path = AStar.GetShortestPath(parent.Position, randomTile.Coord);
+        List<GridCoord> path = AStar.GetShortestPath(Owner.Position, randomTile.Coord);
         
         if (path == null)
         { 
@@ -120,7 +123,7 @@ public class MovementGene : Gene
         }
 
         _moveQueue = path;
-        parent.SetStatusText("Exploring to " + randomTile.Coord.ToString());
+        Owner.SetStatusText("Exploring to " + randomTile.Coord.ToString());
         StartMove();
     }
 
@@ -152,10 +155,10 @@ public class MovementGene : Gene
         _moveQueue.RemoveAt(0);
 
         // Let the position be set by a single source at all levels rather than here
-        WorldMap.Instance.SetCreaturePosition(parent, _currentMoveTarget.Coord);
+        WorldMap.Instance.SetCreaturePosition(Owner, _currentMoveTarget.Coord);
 
         // Rotate towards the movement direction
-        parent.RotateToTarget(_currentMoveTarget.Centre);
+        Owner.RotateToTarget(_currentMoveTarget.Centre);
 
         // Consume nutrition upfront, since the position is changed upfront too
         ConsumeNutrition();
@@ -214,7 +217,7 @@ public class MovementGene : Gene
         WorldTile finalTile = WorldMap.Instance.GetWorldTile(MoveQueue[MoveQueue.Count - 1]);
         Debug.DrawRay(finalTile.Centre, Vector3.up, Color.yellow);
 
-        WorldTile current = WorldMap.Instance.GetWorldTile(parent.Position);
+        WorldTile current = WorldMap.Instance.GetWorldTile(Owner.Position);
         foreach (GridCoord coord in MoveQueue)
         {
             WorldTile tile = WorldMap.Instance.GetWorldTile(coord);

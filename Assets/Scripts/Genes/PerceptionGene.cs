@@ -15,12 +15,17 @@ public class PerceptionGene : Gene
 
 
     public override float UrgeLevel => 0;
+
+    private Creature _owner;
+    public override Creature Owner => _owner;
+
     override public string Name { get { return "Perception"; } }
 
     private void Awake()
     {
-        Randomize();
+        _owner = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
+        Randomize();
     }
 
     public override void Randomize()

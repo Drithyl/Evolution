@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class ThirstGene : Gene
 {
-    private Creature parent;
     private Statistics statistics;
 
     private WorldTile waterSource;
@@ -41,11 +40,15 @@ public class ThirstGene : Gene
     public bool HasStarved { get { return _currentThirst <= 0; } }
     override public float UrgeLevel => 1 - (CurrentThirst / (float)MaxThirst);
 
+
+    private Creature _owner;
+    public override Creature Owner => _owner;
+
     override public string Name { get { return "Thirst"; } }
 
     private void Awake()
     {
-        parent = GetComponent<Creature>();
+        _owner = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
 
         Randomize();
@@ -62,7 +65,7 @@ public class ThirstGene : Gene
         _currentThirst--;
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Thirst);
+            Owner.Die(CauseOfDeath.Thirst);
     }
 
     public void IncreaseThirst(float ratio)
@@ -70,7 +73,7 @@ public class ThirstGene : Gene
         _currentThirst -= Mathf.FloorToInt(MaxThirst * ratio);
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Thirst);
+            Owner.Die(CauseOfDeath.Thirst);
     }
 
     public void SetThirstAtRatio(float ratio)
@@ -78,7 +81,7 @@ public class ThirstGene : Gene
         _currentThirst = Mathf.FloorToInt(MaxThirst * ratio);
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Thirst);
+            Owner.Die(CauseOfDeath.Thirst);
     }
 
     public override void Randomize()
@@ -115,7 +118,7 @@ public class ThirstGene : Gene
         if (waterSource == null)
             return false;
 
-        return GridCoord.AreAdjacent(parent.Position, waterSource.Coord);
+        return GridCoord.AreAdjacent(Owner.Position, waterSource.Coord);
     }
 
     public void Drink()
@@ -123,7 +126,7 @@ public class ThirstGene : Gene
         int waterDrunk = Mathf.FloorToInt(MouthfulNutrition);
 
         // Rotate towards the water
-        parent.RotateToTarget(waterSource.Centre);
+        Owner.RotateToTarget(waterSource.Centre);
 
         // Creatures can overdrink and overeat, which makes bigger
         // mouthfuls potentially more advantageous
@@ -132,7 +135,7 @@ public class ThirstGene : Gene
 
         waterSource.PlayWaterParticles(GameManager.Instance.TimeBetweenTurns);
 
-        parent.SetStatusText("Drinking");
+        Owner.SetStatusText("Drinking");
 
         if (IsFull == true)
             _isSeekingWater = false;
@@ -142,7 +145,7 @@ public class ThirstGene : Gene
     {
         MovementGene movementGene = GetComponent<MovementGene>();
         WorldTile shoreTile = WorldMap.Instance.ClosestTileInRadius(
-            parent.Position,
+            Owner.Position,
             perceptionGene.DistanceInt,
             TerrainTypes.Shore | TerrainTypes.Empty
         );
@@ -171,11 +174,11 @@ public class ThirstGene : Gene
             return;
         }
 
-        parent.SetStatusText("Moving to shore");
+        Owner.SetStatusText("Moving to shore");
 
         if (movementGene != null)
         {
-            List<GridCoord> pathToShore = AStar.GetShortestPath(parent.Position, shoreTile.Coord);
+            List<GridCoord> pathToShore = AStar.GetShortestPath(Owner.Position, shoreTile.Coord);
 
             if (pathToShore == null)
             {

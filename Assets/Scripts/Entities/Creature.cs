@@ -58,9 +58,13 @@ public class Creature : MonoBehaviour
         statistics = GetComponent<Statistics>();
 
         _id = Creature.nextId;
-        statistics.id = Id;
         Creature.nextId++;
         GlobalStatistics.Instance.TotalCreaturesLived++;
+    }
+
+    private void Start()
+    {
+        
     }
 
     private void OnDestroy()
@@ -86,8 +90,6 @@ public class Creature : MonoBehaviour
             _sex = Sex.Types.Male;
             GetComponent<MeshRenderer>().sharedMaterial = maleMaterial;
         }
-
-        statistics.sex = _sex;
     }
 
     public void SetSpecies(SpeciesTypes species)

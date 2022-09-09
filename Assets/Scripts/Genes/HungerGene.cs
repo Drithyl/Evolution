@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class HungerGene : Gene
 {
-    private Creature parent;
     private Statistics statistics;
+
 
     [SerializeField]
     private int _maxHunger;
@@ -44,12 +44,15 @@ public class HungerGene : Gene
     public WorldTile TargetFoodTile => _targetFoodTile;
 
 
+    private Creature _owner;
+    public override Creature Owner => _owner;
+
     override public string Name { get { return "Hunger"; } }
 
 
     private void Awake()
     {
-        parent = GetComponent<Creature>();
+        _owner = GetComponent<Creature>();
         statistics = GetComponent<Statistics>();
 
         Randomize();
@@ -71,7 +74,7 @@ public class HungerGene : Gene
         _currentHunger--;
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Starvation);
+            Owner.Die(CauseOfDeath.Starvation);
     }
 
     public void IncreaseHunger(float ratio)
@@ -79,7 +82,7 @@ public class HungerGene : Gene
         _currentHunger -= Mathf.FloorToInt(MaxHunger * ratio);
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Starvation);
+            Owner.Die(CauseOfDeath.Starvation);
     }
 
     public void SetHungerAt(int amount)
@@ -87,7 +90,7 @@ public class HungerGene : Gene
         _currentHunger = amount;
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Starvation);
+            Owner.Die(CauseOfDeath.Starvation);
     }
 
     public void SetHungerAtRatio(float ratio)
@@ -95,7 +98,7 @@ public class HungerGene : Gene
         _currentHunger = Mathf.FloorToInt(MaxHunger * ratio);
 
         if (HasStarved == true)
-            parent.Die(CauseOfDeath.Starvation);
+            Owner.Die(CauseOfDeath.Starvation);
     }
 
     public override void Randomize()
@@ -129,15 +132,15 @@ public class HungerGene : Gene
 
     public bool CanStartEating()
     {
-        if (_targetFoodTile.HasFood(parent.Diet) == false)
+        if (_targetFoodTile.HasFood(Owner.Diet) == false)
             return false;
 
-        return GridCoord.AreAdjacent(parent.Position, TargetFoodTile.Coord);
+        return GridCoord.AreAdjacent(Owner.Position, TargetFoodTile.Coord);
     }
 
     public void Eat()
     {
-        Food food = WorldMap.Instance.GetFoodAt(TargetFoodTile.Coord, parent.Diet);
+        Food food = WorldMap.Instance.GetFoodAt(TargetFoodTile.Coord, Owner.Diet);
 
         if (food == null)
         {
@@ -146,7 +149,7 @@ public class HungerGene : Gene
         }
 
         // Rotate towards the food
-        parent.RotateToTarget(food.Position);
+        Owner.RotateToTarget(food.Position);
 
         int nutritionMouthful = Mathf.FloorToInt(MouthfulNutrition);
         int nutritionObtained = food.Consume(nutritionMouthful);
@@ -156,7 +159,7 @@ public class HungerGene : Gene
         _currentHunger += nutritionObtained;
 
         statistics.FoodConsumed += nutritionObtained;
-        parent.SetStatusText("Eating");
+        Owner.SetStatusText("Eating");
 
         if (IsFull == true)
             _isSeekingFood = false;
@@ -170,13 +173,13 @@ public class HungerGene : Gene
 
         // If it's plants, the tile we want to find should be
         // empty, otherwise it can't be accessed by the creature
-        if (parent.Diet == FoodType.Plant)
+        if (Owner.Diet == FoodType.Plant)
             terrainToSearch |= TerrainTypes.Empty;
 
         food = WorldMap.Instance.ClosestFoodInRadius(
-            parent.Position, 
+            Owner.Position, 
             perceptionGene.DistanceInt,
-            parent.Diet,
+            Owner.Diet,
             terrainToSearch
         );
 
@@ -198,11 +201,11 @@ public class HungerGene : Gene
         }
 
 
-        parent.SetStatusText("Moving to Food");
+        Owner.SetStatusText("Moving to Food");
 
         if (movementGene != null)
         {
-            List<GridCoord> pathToFood = AStar.GetShortestPath(parent.Position, food.Position);
+            List<GridCoord> pathToFood = AStar.GetShortestPath(Owner.Position, food.Position);
 
             if (pathToFood == null)
             {

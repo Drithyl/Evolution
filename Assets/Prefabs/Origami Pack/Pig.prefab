@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: -1632215795813479362}
   - component: {fileID: -6008422913144199176}
   - component: {fileID: 7936931296626960107}
+  - component: {fileID: -4752228212021592157}
   m_Layer: 0
   m_Name: Pig
   m_TagString: Untagged
@@ -257,6 +258,18 @@ MonoBehaviour:
   _mouthfulNutrition: 0
   _isSeekingWater: 0
   _isThirsty: 0
+--- !u!114 &-4752228212021592157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1543346588463464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c9dca23c510e0b4480b9162dcabbcc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2665351526825964060
 PrefabInstance:
   m_ObjectHideFlags: 0

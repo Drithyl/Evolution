@@ -105,8 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de253d82300996c42afd9664693790bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  id: 0
-  sex: 0
   _generation: 0
   _tilesTraveled: 0
   _foodConsumed: 0
@@ -148,18 +146,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   diet: 1
   speciesType: 1
-  maxAgeRange: {x: 20, y: 30}
+  maxAgeRange: {x: 30, y: 40}
   maturityAgeRange: {x: 0.1, y: 0.2}
-  maxHungerRange: {x: 10, y: 20}
+  maxHungerRange: {x: 15, y: 20}
   foodMouthfulRange: {x: 0.4, y: 0.8}
-  turnRatioToCompleteMoveRange: {x: 0.75, y: 1.25}
-  perceptionRadiusRange: {x: 4, y: 6}
-  maxOffspringRange: {x: 1, y: 3}
-  matingUrgeRange: {x: 0.3, y: 0.8}
+  turnRatioToCompleteMoveRange: {x: 0.75, y: 1}
+  perceptionRadiusRange: {x: 5, y: 7}
+  maxOffspringRange: {x: 1, y: 2}
+  matingUrgeRange: {x: 0.3, y: 0.5}
   turnsToCompleteMatingRange: {x: 1, y: 3}
-  monthsOfPregnancyRange: {x: 1, y: 5}
-  maxThirstRange: {x: 10, y: 20}
-  waterMouthfulRange: {x: 0.2, y: 0.4}
+  monthsOfPregnancyRange: {x: 3, y: 6}
+  maxThirstRange: {x: 30, y: 40}
+  waterMouthfulRange: {x: 0.3, y: 0.6}
 --- !u!114 &-6510592296512493284
 MonoBehaviour:
   m_ObjectHideFlags: 0

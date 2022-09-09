@@ -4,11 +4,8 @@ using UnityEngine;
 
 public class Statistics : MonoBehaviour
 {
-    [ReadOnly]
-    public int id;
-
-    [ReadOnly]
-    public Sex.Types sex;
+    private Creature _owner;
+    public Creature Owner => _owner;
 
     [ReadOnly]
     [SerializeField]
@@ -102,6 +99,10 @@ public class Statistics : MonoBehaviour
     [ReadOnly]
     public List<Statistics> descendants = new List<Statistics>();
 
+    private void Awake()
+    {
+        _owner = GetComponent<Creature>();
+    }
 
     private void OnDestroy()
     {
