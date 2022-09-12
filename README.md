@@ -24,3 +24,14 @@ More details on the goals of the project can be found in my [midterm report](htt
 
 * Tweak values of predators and herbivores to achieve an interesting evolution simulation.
 * Optimize pathing and other areas to enable for larger populations and faster simulations.
+
+
+## Unity Store Assets Used
+
+Runemark Studio, August 2018.
+Origami Animals Pack
+https://assetstore.unity.com/packages/3d/characters/animals/origami-animals-pack-123159
+
+Foust, Jonathan. July 2019.
+(PBR) Low-Lying Plant Pack
+https://assetstore.unity.com/packages/3d/vegetation/plants/pbr-low-lying-plant-pack-150823
